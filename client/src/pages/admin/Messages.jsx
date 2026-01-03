@@ -8,7 +8,7 @@ import {
   buttonStyle,
 } from "./adminTheme";
 
-const API_BASE_URL = import.meta.env.VITE_API_URL || "http://localhost:5000";
+const API_BASE_URL = "https://velvettide-restaurant.onrender.com";
 const MESSAGES_CACHE_KEY = "adminMessagesCache";
 
 const readMessagesCache = () => {
