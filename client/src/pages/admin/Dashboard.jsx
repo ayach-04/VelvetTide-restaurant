@@ -11,6 +11,27 @@ import {
 } from "./adminTheme";
 
 const API_BASE_URL = import.meta.env.VITE_API_URL || "http://localhost:5000";
+const reservationIconUrl = new URL("/Icons/reservation-black.png", import.meta.url).href;
+const managementIconUrl = new URL("/Icons/management-black.png", import.meta.url).href;
+const messagesIconUrl = new URL("/Icons/messages-balck.png", import.meta.url).href;
+
+const AddReservationIcon = ({ color = "#4f46e5" }) => (
+  <svg
+    width="24"
+    height="24"
+    viewBox="0 0 24 24"
+    fill="none"
+    xmlns="http://www.w3.org/2000/svg"
+    stroke={color}
+    strokeWidth="1.6"
+    strokeLinecap="round"
+    strokeLinejoin="round"
+  >
+    <circle cx="12" cy="12" r="8.5" />
+    <line x1="12" y1="9.5" x2="12" y2="14.5" />
+    <line x1="9.5" y1="12" x2="14.5" y2="12" />
+  </svg>
+);
 
 const WEEKLY_HOURS = [
   { dayIndex: 0, label: "Sunday", closed: true },
@@ -345,10 +366,30 @@ export default function Dashboard() {
   );
 
   const quickActions = [
-    { id: "add", label: "Add Reservation", icon: "➕", path: "/admin/reservations" },
-    { id: "view", label: "View Reservations", icon: "📋", path: "/admin/reservations" },
-    { id: "menu", label: "Manage Menu", icon: "🍽", path: "/admin/management" },
-    { id: "messages", label: "View Messages", icon: "💬", path: "/admin/messages" },
+    {
+      id: "add",
+      label: "Add Reservation",
+      icon: { render: () => <AddReservationIcon color={adminTheme.palette.contrast} /> },
+      path: "/admin/reservations",
+    },
+    {
+      id: "view",
+      label: "View Reservations",
+      icon: { src: reservationIconUrl, alt: "View reservations" },
+      path: "/admin/reservations",
+    },
+    {
+      id: "menu",
+      label: "Manage Menu",
+      icon: { src: managementIconUrl, alt: "Manage menu" },
+      path: "/admin/management",
+    },
+    {
+      id: "messages",
+      label: "View Messages",
+      icon: { src: messagesIconUrl, alt: "View messages" },
+      path: "/admin/messages",
+    },
   ];
 
   const handleRefresh = () => {
@@ -379,20 +420,21 @@ export default function Dashboard() {
         <div
           style={{
             display: "grid",
-            gridTemplateColumns: "1fr 0.9fr 1fr 1fr 0.9fr",
-            gap: "8px",
-            padding: "14px 18px",
+            gridTemplateColumns: "1fr 0.8fr 0.8fr 1.2fr 0.9fr",
+           
+            padding: "14px 20px",
             background: adminTheme.palette.surfaceMuted,
             fontSize: "0.8rem",
             letterSpacing: "0.08em",
             textTransform: "uppercase",
-            color: adminTheme.palette.textMuted,
+            color: adminTheme.palette.contrast,
+            marginLeft: "-5px"
           }}
         >
           <div>Time</div>
           <div>Guests</div>
-          <div>Phone</div>
           <div>Table</div>
+          <div>Phone</div>
           <div>Status</div>
         </div>
         {isLoading && derivedMetrics.todaysReservations.length === 0 ? (
@@ -425,10 +467,14 @@ export default function Dashboard() {
               reservation.table && typeof reservation.table === "object"
                 ? reservation.table
                 : null;
-            const tableLabel = tableMeta?.table_number
-              ? `Table ${tableMeta.table_number}`
-              : reservation.table && typeof reservation.table === "string"
-              ? reservation.table
+            const rawTableLabel =
+              typeof tableMeta?.table_number === "number"
+                ? tableMeta.table_number
+                : reservation.table && typeof reservation.table === "string"
+                ? reservation.table
+                : null;
+            const tableLabel = rawTableLabel
+              ? String(rawTableLabel).match(/\d+/)?.[0] || String(rawTableLabel)
               : "Unassigned";
             return (
               <button
@@ -437,9 +483,9 @@ export default function Dashboard() {
                 onClick={() => navigate("/admin/reservations")}
                 style={{
                   display: "grid",
-                  gridTemplateColumns: "1fr 0.9fr 1fr 1fr 0.9fr",
+                  gridTemplateColumns: "1fr 0.8fr 0.8fr 1.2fr 0.9fr",
                   gap: "8px",
-                  padding: "16px 18px",
+                  padding: "16px 20px",
                   width: "100%",
                   border: "none",
                   borderBottom: `1px solid ${adminTheme.palette.border}`,
@@ -447,15 +493,16 @@ export default function Dashboard() {
                   textAlign: "left",
                   cursor: "pointer",
                   fontFamily: adminTheme.fonts.body,
+                  color: adminTheme.palette.contrast,
                   transition: "background 0.2s ease",
                 }}
               >
                 <div style={{ fontWeight: 600 }}>{formatTimeDisplay(reservation.reservation_time)}</div>
-                <div>{reservation.number_of_persons || "-"} guests</div>
+                <div>{reservation.number_of_persons || "-"}</div>
+                <div>{tableLabel}</div>
                 <div style={{ fontVariantNumeric: "tabular-nums" }}>
                   {formatPhoneNumber(reservation.phone_number)}
                 </div>
-                <div>{tableLabel}</div>
                 <div>
                   <span
                     style={createChipStyle(chipVariant, {
@@ -558,30 +605,38 @@ export default function Dashboard() {
 
   const statusCard = (
     <div style={createCardStyle({ padding: "24px", display: "flex", flexDirection: "column", gap: "18px" })}>
-      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-        <div>
-          <h2 style={{ fontFamily: adminTheme.fonts.display, margin: 0 }}>Restaurant Status</h2>
-          <p style={{ ...mutedParagraphStyle, marginTop: "6px" }}>Context for today&apos;s service</p>
-        </div>
-        <span
-          style={createChipStyle(statusInfo.isOpen ? "success" : "danger", {
-            padding: "8px 16px",
-            letterSpacing: "0.05em",
-          })}
-        >
-          {statusInfo.statusLabel}
-        </span>
+    <div style={{ display: "flex", flexDirection: "column", gap: "16px" }}>
+      <div
+        style={{
+          display: "flex",
+          justifyContent: "space-between",
+          alignItems: "center",
+          gap: "12px",
+        }}
+      >
+        <h2 style={{ fontFamily: adminTheme.fonts.display, margin: 0 }}>Restaurant Status</h2>
       </div>
-      <div style={{ display: "flex", flexDirection: "column", gap: "16px" }}>
-        <InfoRow label="Today" value={statusInfo.dayLabel} />
-        <InfoRow label="Opening hours" value={statusInfo.hoursLabel} />
-        <InfoRow label="Restaurant status" value={statusInfo.statusLabel} />
-        <InfoRow
-          label="Next reservation"
-          value={statusInfo.nextReservationLabel}
-          helper={statusInfo.nextReservationDate ? formatFullDate(statusInfo.nextReservationDate) : undefined}
-        />
-      </div>
+      <InfoRow label="Today" value={statusInfo.dayLabel} />
+      <InfoRow
+        label="Restaurant status"
+        value={
+          <span
+            style={createChipStyle(statusInfo.isOpen ? "success" : "danger", {
+              padding: "8px 16px",
+              letterSpacing: "0.05em",
+            })}
+          >
+            {statusInfo.statusLabel}
+          </span>
+        }
+      />
+      <InfoRow label="Opening hours" value={statusInfo.hoursLabel} />
+      <InfoRow
+        label="Next reservation"
+        value={statusInfo.nextReservationLabel}
+        helper={statusInfo.nextReservationDate ? formatFullDate(statusInfo.nextReservationDate) : undefined}
+      />
+    </div>
     </div>
   );
 
@@ -589,7 +644,6 @@ export default function Dashboard() {
     <div style={createCardStyle({ padding: "24px" })}>
       <div>
         <h2 style={{ fontFamily: adminTheme.fonts.display, margin: "0 0 6px" }}>Quick actions</h2>
-        <p style={{ ...mutedParagraphStyle, margin: 0 }}>Jump to the workflows you open all the time.</p>
       </div>
       <div
         style={{
@@ -615,7 +669,13 @@ export default function Dashboard() {
               }),
             }}
           >
-            <span style={{ fontSize: "1.25rem" }}>{action.icon}</span>
+            {action.icon?.render ? (
+              <span style={{ display: "inline-flex", width: 24, height: 24 }}>
+                {action.icon.render()}
+              </span>
+            ) : (
+              <img src={action.icon.src} alt={action.icon.alt} style={{ width: 22, height: 22 }} />
+            )}
             {action.label}
           </button>
         ))}
@@ -625,6 +685,7 @@ export default function Dashboard() {
 
   const kpiGridTemplate =
     windowWidth <= 520 ? "1fr" : windowWidth <= 960 ? "repeat(2, minmax(0, 1fr))" : "repeat(4, minmax(0, 1fr))";
+  const isKpiCompact = windowWidth <= 640;
   const mainGridTemplate =
     windowWidth <= 1080 ? "1fr" : "minmax(0, 1.8fr) minmax(0, 1fr)";
 
@@ -640,37 +701,45 @@ export default function Dashboard() {
         }}
       >
         <div style={{ flex: "1 1 360px" }}>
-          <h1 style={sectionHeadingStyle}>Service Dashboard</h1>
-          <div style={underlineStyle} />
-     
-        </div>
-        <div style={{ display: "flex", gap: "12px", alignItems: "center", flexWrap: "wrap" }}>
-          <button
-            type="button"
-            onClick={handleRefresh}
-            disabled={isRefreshing}
+          <div
             style={{
-              border: "none",
-              borderRadius: "999px",
-              backgroundColor: "#5ea34d",
-              padding: "14px 24px",
               display: "flex",
               alignItems: "center",
-              justifyContent: "center",
-              gap: "8px",
-              cursor: isRefreshing ? "not-allowed" : "pointer",
-              color: "#fff",
-              fontFamily: adminTheme.fonts.body,
-              fontWeight: 700,
-              letterSpacing: "0.05em",
-              fontSize: "0.9rem",
-              minWidth: "160px",
-              opacity: isRefreshing ? 0.8 : 1,
+              justifyContent: "space-between",
+              gap: "12px",
             }}
           >
-            <img src="/Icons/refresh.png" alt="" style={{ width: 18, height: 18 }} />
-            {isRefreshing ? "Refreshing..." : "Refresh"}
-          </button>
+            <h1 style={{ ...sectionHeadingStyle, marginBottom: 0 }}>Service Dashboard</h1>
+            <button
+              type="button"
+              onClick={handleRefresh}
+              disabled={isRefreshing}
+              aria-label={isRefreshing ? "Refreshing data..." : "Refresh dashboard"}
+              title={isRefreshing ? "Refreshing..." : "Refresh"}
+              style={{
+                width: 44,
+                height: 44,
+                borderRadius: "50%",
+                border: "1px solid rgba(0,0,0,0.12)",
+                background: adminTheme.gradients.ink,
+                display: "inline-flex",
+                alignItems: "center",
+                justifyContent: "center",
+                padding: 0,
+                cursor: isRefreshing ? "not-allowed" : "pointer",
+                opacity: isRefreshing ? 0.6 : 1,
+                transition: "opacity 0.2s ease",
+              }}
+            >
+              <img
+                src="/Icons/refresh.png"
+                alt=""
+                style={{ width: 18, height: 18, opacity: 0.9 }}
+              />
+            </button>
+          </div>
+          <div style={underlineStyle} />
+     
         </div>
       </div>
 
@@ -699,18 +768,40 @@ export default function Dashboard() {
         {kpiCards.map((card) => (
           <div
             key={card.id}
-            style={createCardStyle({
-              padding: "20px",
+            style={{
+              borderRadius: "26px",
+              padding: "18px 22px",
+              background: "#fff",
+              border: `1px solid ${adminTheme.palette.border}`,
               display: "flex",
-              flexDirection: "column",
-              gap: "8px",
-            })}
+              flexDirection: isKpiCompact ? "row" : "column",
+              alignItems: isKpiCompact ? "center" : "flex-start",
+              justifyContent: isKpiCompact ? "space-between" : "flex-start",
+              gap: isKpiCompact ? "12px" : "6px",
+            }}
           >
-            <div style={{ fontSize: "0.8rem", letterSpacing: "0.1em", textTransform: "uppercase", color: adminTheme.palette.textMuted }}>
+            <div
+              style={{
+                fontSize: "0.75rem",
+                letterSpacing: "0.3em",
+                textTransform: "uppercase",
+                color: adminTheme.palette.textMuted,
+                flex: isKpiCompact ? "1" : "initial",
+              }}
+            >
               {card.label}
             </div>
-            <div style={{ fontSize: "2rem", fontWeight: 600, marginTop: "4px" }}>{formatNumber(card.value)}</div>
-            <div style={{ ...mutedParagraphStyle, marginTop: "4px" }}>{card.detail}</div>
+            <div
+              style={{
+                fontSize: "1.6rem",
+                fontFamily: adminTheme.fonts.display,
+                marginLeft: isKpiCompact ? "auto" : 0,
+                textAlign: isKpiCompact ? "right" : "left",
+                minWidth: isKpiCompact ? "auto" : "100%",
+              }}
+            >
+              {formatNumber(card.value)}
+            </div>
           </div>
         ))}
       </div>
@@ -723,14 +814,15 @@ export default function Dashboard() {
           alignItems: "start",
         }}
       >
-        {reservationsCard}
         <div style={{ display: "flex", flexDirection: "column", gap: "24px" }}>
+          {reservationsCard}
           {messagesCard}
+        </div>
+        <div style={{ display: "flex", flexDirection: "column", gap: "24px" }}>
           {statusCard}
+          {quickActionsCard}
         </div>
       </div>
-
-      {quickActionsCard}
     </div>
   );
 }

@@ -491,10 +491,12 @@ export default function ReservationsManagement() {
   const displayedRangeEnd = filteredReservations.length
     ? Math.min(pageStartIndex + pageSize, filteredReservations.length)
     : 0;
-  const tableColumnTemplate =
-    windowWidth <= 1024
-      ? "repeat(2, minmax(0, 1fr))"
-      : "0.6fr 1.2fr 1.1fr 0.95fr 0.75fr 1.1fr 1.1fr 2fr";
+  const isMobileTable = windowWidth <= 640;
+  const tableColumnTemplate = isMobileTable
+    ? "repeat(2, minmax(0, 1fr))"
+    : windowWidth <= 1024
+    ? "repeat(2, minmax(0, 1fr))"
+    : "0.6fr 1.2fr 1.1fr 0.95fr 0.75fr 1.1fr 1.1fr 2fr";
   const cancellationGuestName =
     (cancellationTarget && (cancellationTarget.guest_name || cancellationTarget.name)) || "";
   const cancellationDateLabel = cancellationTarget
@@ -1720,10 +1722,11 @@ export default function ReservationsManagement() {
       >
         <div
           style={{
-            display: "grid",
-            gridTemplateColumns: windowWidth <= 640 ? "1fr" : "minmax(260px, 600px) minmax(220px, 340px)",
-            gap: "12px",
+            display: "flex",
             alignItems: "center",
+            gap: "12px",
+            flexWrap: "nowrap",
+            width: "100%",
           }}
         >
           <div
@@ -1731,9 +1734,8 @@ export default function ReservationsManagement() {
               position: "relative",
               borderRadius: adminTheme.radii.pill,
               border: `1px solid ${adminTheme.palette.border}`,
-              boxShadow: "none",
               background: "#fff",
-              transition: "border-color 0.2s ease, box-shadow 0.2s ease",
+              flex: 1,
               cursor: "text",
             }}
             onClick={() => searchInputRef.current?.focus()}
@@ -1748,7 +1750,16 @@ export default function ReservationsManagement() {
                 pointerEvents: "none",
               }}
             >
-              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+              <svg
+                width="18"
+                height="18"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="1.8"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              >
                 <circle cx="11" cy="11" r="8" />
                 <line x1="21" y1="21" x2="16.65" y2="16.65" />
               </svg>
@@ -1775,114 +1786,115 @@ export default function ReservationsManagement() {
           <div
             style={{
               display: "flex",
-              justifyContent: "flex-end",
+              alignItems: "center",
               gap: "10px",
-              alignItems: "center",
-              flexWrap: windowWidth <= 640 ? "wrap" : "nowrap",
-              marginLeft: "auto",
-              width: "100%",
+              flexShrink: 0,
             }}
           >
-          <div
-            style={{
-              borderRadius: adminTheme.radii.lg,
-              border: `1px solid ${adminTheme.palette.border}`,
-              background: "#fff",
-              display: "flex",
-              alignItems: "center",
-              padding: "13px 18px",
-              gap: "8px",
-              boxShadow: "0 2px 6px rgba(0,0,0,0.06)",
-              width: windowWidth <= 640 ? "100%" : "100px",
-            }}
-          >
-            <button
-              type="button"
-              onMouseDown={(e) => {
-                e.preventDefault();
-                openDatePicker(dateFromInputRef);
-              }}
-              onClick={() => openDatePicker(dateFromInputRef)}
+            <div
               style={{
-                border: "none",
-                background: "transparent",
-                padding: 0,
                 display: "flex",
                 alignItems: "center",
-                cursor: "pointer",
+                justifyContent: "center",
+                width: "46px",
+                height: "46px",
+                borderRadius: adminTheme.radii.md,
+                border: `1px solid ${adminTheme.palette.border}`,
+                background: "#fff",
+                boxShadow: "0 2px 6px rgba(0,0,0,0.06)",
+                position: "relative",
               }}
-              aria-label="Select start date"
             >
-              <img src="/Icons/calendar.png" alt="" style={{ width: 16, height: 16 }} />
-            </button>
-            <input
-              className="date-picker-input"
-              ref={dateFromInputRef}
-              type="date"
-              value={dateFrom}
-              onChange={(e) => setDateFrom(e.target.value)}
+              <button
+                type="button"
+                onMouseDown={(e) => {
+                  e.preventDefault();
+                  openDatePicker(dateFromInputRef);
+                }}
+                onClick={() => openDatePicker(dateFromInputRef)}
+                style={{
+                  border: "none",
+                  background: "transparent",
+                  padding: 0,
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  cursor: "pointer",
+                }}
+                aria-label="Select start date"
+              >
+                <img src="/Icons/calendar.png" alt="" style={{ width: 18, height: 18 }} />
+              </button>
+              <input
+                className="date-picker-input"
+                ref={dateFromInputRef}
+                type="date"
+                value={dateFrom}
+                onChange={(e) => setDateFrom(e.target.value)}
+                style={{
+                  position: "absolute",
+                  opacity: 0,
+                  pointerEvents: "none",
+                  width: "1px",
+                  height: "1px",
+                  top: 0,
+                  left: 0,
+                }}
+              />
+            </div>
+            <span style={{ fontSize: "0.85rem", color: adminTheme.palette.textMuted }}>To</span>
+            <div
               style={{
-                width: "100%",
-                border: "none",
-                background: "transparent",
-                fontFamily: adminTheme.fonts.body,
-                fontSize: "0.9rem",
-                color: adminTheme.palette.contrast,
-                outline: "none",
-              }}
-            />
-          </div>
-          <span style={{ fontSize: "0.85rem", color: adminTheme.palette.textMuted }}>To</span>
-          <div
-            style={{
-              borderRadius: adminTheme.radii.lg,
-              border: `1px solid ${adminTheme.palette.border}`,
-              background: "#fff",
-              display: "flex",
-              alignItems: "center",
-              padding: "13px 18px",
-              gap: "8px",
-              boxShadow: "0 2px 6px rgba(0,0,0,0.06)",
-              width: windowWidth <= 640 ? "100%" : "100px",
-            }}
-          >
-            <button
-              type="button"
-              onMouseDown={(e) => {
-                e.preventDefault();
-                openDatePicker(dateToInputRef);
-              }}
-              onClick={() => openDatePicker(dateToInputRef)}
-              style={{
-                border: "none",
-                background: "transparent",
-                padding: 0,
                 display: "flex",
                 alignItems: "center",
-                cursor: "pointer",
+                justifyContent: "center",
+                width: "46px",
+                height: "46px",
+                borderRadius: adminTheme.radii.md,
+                border: `1px solid ${adminTheme.palette.border}`,
+                background: "#fff",
+                boxShadow: "0 2px 6px rgba(0,0,0,0.06)",
+                position: "relative",
               }}
-              aria-label="Select end date"
             >
-              <img src="/Icons/calendar.png" alt="" style={{ width: 16, height: 16 }} />
-            </button>
-            <input
-              className="date-picker-input"
-              ref={dateToInputRef}
-              type="date"
-              value={dateTo}
-              onChange={(e) => setDateTo(e.target.value)}
-              style={{
-                width: "100%",
-                border: "none",
-                background: "transparent",
-                fontFamily: adminTheme.fonts.body,
-                fontSize: "0.95rem",
-                color: adminTheme.palette.contrast,
-                outline: "none",
-              }}
-            />
+              <button
+                type="button"
+                onMouseDown={(e) => {
+                  e.preventDefault();
+                  openDatePicker(dateToInputRef);
+                }}
+                onClick={() => openDatePicker(dateToInputRef)}
+                style={{
+                  border: "none",
+                  background: "transparent",
+                  padding: 0,
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  cursor: "pointer",
+                }}
+                aria-label="Select end date"
+              >
+                <img src="/Icons/calendar.png" alt="" style={{ width: 18, height: 18 }} />
+              </button>
+              <input
+                className="date-picker-input"
+                ref={dateToInputRef}
+                type="date"
+                value={dateTo}
+                onChange={(e) => setDateTo(e.target.value)}
+                style={{
+                  position: "absolute",
+                  opacity: 0,
+                  pointerEvents: "none",
+                  width: "1px",
+                  height: "1px",
+                  top: 0,
+                  left: 0,
+                }}
+              />
+            </div>
           </div>
-        </div>
         </div>
       </div>
 
@@ -2242,6 +2254,75 @@ export default function ReservationsManagement() {
         </div>
       )}
 
+      {/* Mobile quick status filters */}
+      {isMobileTable && (
+        <div
+          style={{
+            marginBottom: "20px",
+            padding: "0 4px",
+          }}
+        >
+          <div
+            style={{
+              display: "grid",
+              gridTemplateColumns: "repeat(2, minmax(0, 1fr))",
+              gap: "12px",
+            }}
+          >
+            {["all", "confirmed", "pending", "cancelled"].map((value) => {
+              const label =
+                value === "all"
+                  ? "All Status"
+                  : value.charAt(0).toUpperCase() + value.slice(1);
+              const count =
+                value === "all"
+                  ? reservations.length
+                  : statusCounts[label] || 0;
+              const isActive = statusFilter === value;
+              return (
+                <button
+                  key={value}
+                  type="button"
+                  onClick={() => setStatusFilter(value)}
+                  style={{
+                    width: "100%",
+                    borderRadius: "999px",
+                    border: `1px solid ${isActive ? "#999" : "#d9d9d9"}`,
+                    background: isActive ? "#f1f1f1" : "#fff",
+                    color: "#4a4a4a",
+                    padding: "10px 18px",
+                    fontFamily: adminTheme.fonts.body,
+                    fontWeight: 700,
+                    fontSize: "0.75rem",
+                    letterSpacing: "0.2em",
+                    textTransform: "uppercase",
+                    cursor: "pointer",
+                    display: "flex",
+                    alignItems: "center",
+                    gap: "10px",
+                    boxShadow: isActive ? "0 6px 16px rgba(0,0,0,0.08)" : "none",
+                    justifyContent: "space-between",
+                  }}
+                >
+                  <span>{label}</span>
+                  <span
+                    style={{
+                      borderRadius: "999px",
+                      padding: "2px 10px",
+                      background: isActive ? "#dcdcdc" : "#f5f5f5",
+                      fontSize: "0.7rem",
+                      letterSpacing: "normal",
+                    }}
+                  >
+                    {count}
+                  </span>
+                </button>
+              );
+            })}
+          </div>
+        </div>
+      )}
+
       {/* Reservations table */}
       <div
         style={{
@@ -2254,122 +2335,124 @@ export default function ReservationsManagement() {
           }),
         }}
       >
-        <div
-          style={{
-            display: "grid",
-            gridTemplateColumns: tableColumnTemplate,
-            padding: "14px 26px",
-            fontSize: "0.7rem",
-            textTransform: "uppercase",
-            letterSpacing: "0.2em",
-            color: "#000",
-            borderBottom: `1px solid ${adminTheme.palette.border}`,
-            rowGap: "10px",
-            fontFamily: adminTheme.fonts.body,
-          }}
-        >
-          <div>#</div>
-          <div>Phone Num</div>
-          <div>Date</div>
-          <div>Time</div>
-          <div style={{ justifySelf: "start", marginLeft: "-16px" }}>Guests</div>
-          <div style={{ justifySelf: "start", marginLeft: "-6px" }}>Table</div>
+        {!isMobileTable && (
           <div
-            ref={statusDropdownRef}
-            style={{ position: "relative", display: "flex", alignItems: "center", gap: "8px" }}
+            style={{
+              display: "grid",
+              gridTemplateColumns: tableColumnTemplate,
+              padding: "14px 26px",
+              fontSize: "0.7rem",
+              textTransform: "uppercase",
+              letterSpacing: "0.2em",
+              color: "#000",
+              borderBottom: `1px solid ${adminTheme.palette.border}`,
+              rowGap: "10px",
+              fontFamily: adminTheme.fonts.body,
+            }}
           >
-            <span>Status</span>
-            <button
-              type="button"
-              onClick={(e) => {
-                e.stopPropagation();
-                setIsStatusFilterOpen((prev) => !prev);
-              }}
-              style={{
-                border: "none",
-                background: "transparent",
-                padding: 0,
-                display: "inline-flex",
-                alignItems: "center",
-                cursor: "pointer",
-                position: "relative",
-              }}
-              aria-label="Filter by status"
+            <div>#</div>
+            <div>Phone Num</div>
+            <div>Date</div>
+            <div>Time</div>
+            <div style={{ justifySelf: "start", marginLeft: "-16px" }}>Guests</div>
+            <div style={{ justifySelf: "start", marginLeft: "-6px" }}>Table</div>
+            <div
+              ref={statusDropdownRef}
+              style={{ position: "relative", display: "flex", alignItems: "center", gap: "8px" }}
             >
-              <svg
-                width="16"
-                height="16"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="#333"
-                strokeWidth="2"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                style={{
-                  transition: "transform 0.2s ease",
-                  transform: isStatusFilterOpen ? "rotate(180deg)" : "rotate(0deg)",
+              <span>Status</span>
+              <button
+                type="button"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  setIsStatusFilterOpen((prev) => !prev);
                 }}
+                style={{
+                  border: "none",
+                  background: "transparent",
+                  padding: 0,
+                  display: "inline-flex",
+                  alignItems: "center",
+                  cursor: "pointer",
+                  position: "relative",
+                }}
+                aria-label="Filter by status"
               >
-                <polyline points="6 9 12 15 18 9" />
-              </svg>
-              {statusFilter !== "all" && (
-                <span
+                <svg
+                  width="16"
+                  height="16"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="#333"
+                  strokeWidth="2"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
                   style={{
-                    width: "6px",
-                    height: "6px",
-                    borderRadius: "50%",
-                    background: "#5ea34d",
-                    position: "absolute",
-                    top: "-3px",
-                    right: "-3px",
+                    transition: "transform 0.2s ease",
+                    transform: isStatusFilterOpen ? "rotate(180deg)" : "rotate(0deg)",
                   }}
-                />
-              )}
-            </button>
-            {isStatusFilterOpen && (
-              <div
-                style={{
-                  position: "absolute",
-                  top: "calc(100% + 8px)",
-                  right: 0,
-                  background: "#fff",
-                  borderRadius: adminTheme.radii.md,
-                  border: `1px solid ${adminTheme.palette.border}`,
-                  boxShadow: "0 12px 28px rgba(0, 0, 0, 0.12)",
-                  minWidth: "170px",
-                  zIndex: 10,
-                  overflow: "hidden",
-                }}
-              >
-                {statusFilterOptions.map((option) => (
-                  <button
-                    key={option.value}
-                    type="button"
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      setStatusFilter(option.value);
-                      setIsStatusFilterOpen(false);
-                    }}
+                >
+                  <polyline points="6 9 12 15 18 9" />
+                </svg>
+                {statusFilter !== "all" && (
+                  <span
                     style={{
-                      width: "100%",
-                      textAlign: "left",
-                      padding: "10px 16px",
-                      background: option.value === statusFilter ? "rgba(0,0,0,0.05)" : "#fff",
-                      border: "none",
-                      fontFamily: adminTheme.fonts.body,
-                      fontSize: "0.85rem",
-                      color: adminTheme.palette.contrast,
-                      cursor: "pointer",
+                      width: "6px",
+                      height: "6px",
+                      borderRadius: "50%",
+                      background: "#5ea34d",
+                      position: "absolute",
+                      top: "-3px",
+                      right: "-3px",
                     }}
-                  >
-                    {option.label}
-                  </button>
-                ))}
-              </div>
-            )}
+                  />
+                )}
+              </button>
+              {isStatusFilterOpen && (
+                <div
+                  style={{
+                    position: "absolute",
+                    top: "calc(100% + 8px)",
+                    right: 0,
+                    background: "#fff",
+                    borderRadius: adminTheme.radii.md,
+                    border: `1px solid ${adminTheme.palette.border}`,
+                    boxShadow: "0 12px 28px rgba(0, 0, 0, 0.12)",
+                    minWidth: "170px",
+                    zIndex: 10,
+                    overflow: "hidden",
+                  }}
+                >
+                  {statusFilterOptions.map((option) => (
+                    <button
+                      key={option.value}
+                      type="button"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        setStatusFilter(option.value);
+                        setIsStatusFilterOpen(false);
+                      }}
+                      style={{
+                        width: "100%",
+                        textAlign: "left",
+                        padding: "10px 16px",
+                        background: option.value === statusFilter ? "rgba(0,0,0,0.05)" : "#fff",
+                        border: "none",
+                        fontFamily: adminTheme.fonts.body,
+                        fontSize: "0.85rem",
+                        color: adminTheme.palette.contrast,
+                        cursor: "pointer",
+                      }}
+                    >
+                      {option.label}
+                    </button>
+                  ))}
+                </div>
+              )}
+            </div>
+            <div style={{ marginLeft: "20px" }}>Actions</div>
           </div>
-          <div style={{ marginLeft: "20px" }}>Actions</div>
-        </div>
+        )}
 
         <div style={{ display: "flex", flexDirection: "column" }}>
           {isLoading ? (
@@ -2439,145 +2522,222 @@ export default function ReservationsManagement() {
                 opacity: isStatusMutating ? 0.45 : 1,
                 cursor: isStatusMutating ? "not-allowed" : "pointer",
               };
+              const statusStyle =
+                statusStyles[statusLabel.toLowerCase()] || statusStyles.default;
+              const statusChip = (
+                <div
+                  style={{
+                    display: "inline-flex",
+                    alignItems: "center",
+                    gap: "6px",
+                    padding: "6px 12px 6px 8px",
+                    borderRadius: "999px",
+                    fontSize: "0.72rem",
+                    fontWeight: 600,
+                    letterSpacing: "0.05em",
+                    textTransform: "uppercase",
+                    background: statusStyle.background,
+                    color: statusStyle.color,
+                    ...(isMobileTable ? {} : { justifySelf: "start", marginLeft: "-16px" }),
+                  }}
+                >
+                  <span
+                    style={{
+                      width: "8px",
+                      height: "8px",
+                      borderRadius: "50%",
+                      backgroundColor: statusStyle.dot,
+                    }}
+                  />
+                  {statusLabel}
+                </div>
+              );
+              const actionButtons = (
+                <div
+                  style={{
+                    display: "flex",
+                    gap: "12px",
+                    alignItems: "center",
+                    flexWrap: "wrap",
+                    justifyContent: isMobileTable ? "flex-start" : undefined,
+                  }}
+                >
+                  <button
+                    type="button"
+                    style={actionButtonStyle}
+                    onClick={() => handleReservationAction("edit", reservation)}
+                    aria-label="Edit reservation"
+                  >
+                    <img src={actionIcons.edit} alt="" style={{ width: 18, height: 18 }} />
+                  </button>
+                  <button
+                    type="button"
+                    style={cancelButtonStyle}
+                    disabled={isStatusMutating}
+                    onClick={() =>
+                      handleReservationAction(isCancelled ? "revert" : "cancel", reservation)
+                    }
+                    aria-label={isCancelled ? "Reinstate reservation" : "Cancel reservation"}
+                  >
+                    <img src={cancelIconSrc} alt="" style={{ width: 18, height: 18 }} />
+                  </button>
+                  <button
+                    type="button"
+                    style={actionButtonStyle}
+                    onClick={() => handleApproveClick(reservation)}
+                    aria-label="Approve reservation"
+                  >
+                    <img src={approveIconSrc} alt="" style={{ width: 18, height: 18 }} />
+                  </button>
+                  <button
+                    type="button"
+                    style={actionButtonStyle}
+                    onClick={() => handleReservationAction("more", reservation)}
+                    aria-label="More actions"
+                  >
+                    <img src={actionIcons.more} alt="" style={{ width: 18, height: 18 }} />
+                  </button>
+                </div>
+              );
 
               const isExpanded =
                 reservationIdValue && expandedReservationId === reservationIdValue;
+              const mobileInfoItems = [
+                { label: "Guest", value: reservation.guest_name || "-" },
+                { label: "Guests", value: guestTotal },
+                { label: "Phone", value: phoneDisplay },
+                { label: "Table", value: tableLabel },
+              ];
+              if (tablePosition) {
+                mobileInfoItems.push({ label: "Area", value: tablePosition });
+              }
 
               return (
                 <React.Fragment key={rowKey}>
-                  <div
-                    style={{
-                      display: "grid",
-                      gridTemplateColumns: tableColumnTemplate,
-                      padding: "18px 22px",
-                      borderBottom: isExpanded
-                        ? "none"
-                        : `1px solid ${adminTheme.palette.border}`,
-                      gap: "10px",
-                      alignItems: "center",
-                      fontFamily: adminTheme.fonts.body,
-                      fontSize: "0.9rem",
-                      color: "#333",
-                    }}
-                  >
-                    <div style={{ fontSize: "0.95rem", fontWeight: 600 }}>{displayPosition}</div>
-                    <div style={{ fontSize: "0.85rem", fontWeight: 500 }}>{phoneDisplay}</div>
-                    <div style={{ fontSize: "0.85rem", fontWeight: 500 }}>{dateDisplay}</div>
-                    <div style={{ fontSize: "0.85rem", fontWeight: 600 }}>{timeDisplay}</div>
+                  {isMobileTable ? (
                     <div
                       style={{
-                        fontSize: "0.85rem",
-                        fontWeight: 600,
-                        justifySelf: "start",
-                        marginLeft: "-20px",
+                        padding: "18px 18px",
+                        borderBottom: isExpanded
+                          ? "none"
+                          : `1px solid ${adminTheme.palette.border}`,
+                        fontFamily: adminTheme.fonts.body,
+                        color: "#333",
                       }}
                     >
-                      {guestTotal}
-                    </div>
-                    <div
-                      style={{
-                        fontSize: "0.78rem",
-                        fontWeight: 600,
-                        justifySelf: "start",
-                        marginLeft: "-16px",
-                        color: tableMeta ? "#1d1d1d" : "#9a9a9a",
-                      }}
-                    >
-                      {tableLabel}
-                      {tablePosition && (
-                        <div
-                          style={{
-                            fontSize: "0.7rem",
-                            fontWeight: 500,
-                            color: "#7a7a7a",
-                          }}
-                        >
-                          {tablePosition}
-                        </div>
-                      )}
-                    </div>
-                    <div
-                      style={{
-                        display: "inline-flex",
-                        alignItems: "center",
-                        gap: "6px",
-                        padding: "6px 12px 6px 8px",
-                        borderRadius: "999px",
-                        fontSize: "0.72rem",
-                        fontWeight: 600,
-                        letterSpacing: "0.05em",
-                        textTransform: "uppercase",
-                        justifySelf: "start",
-                        marginLeft: "-16px",
-                        background:
-                          statusStyles[statusLabel.toLowerCase()]?.background || statusStyles.default.background,
-                        color: statusStyles[statusLabel.toLowerCase()]?.color || statusStyles.default.color,
-                      }}
-                    >
-                      <span
+                      <div
                         style={{
-                          width: "8px",
-                          height: "8px",
-                          borderRadius: "50%",
-                          backgroundColor:
-                            statusStyles[statusLabel.toLowerCase()]?.dot || statusStyles.default.dot,
+                          display: "flex",
+                          justifyContent: "space-between",
+                          alignItems: "flex-start",
+                          gap: "12px",
                         }}
-                      />
-                      {statusLabel}
+                      >
+                        <div>
+                          <div style={{ fontSize: "0.95rem", fontWeight: 600 }}>
+                            #{displayPosition}
+                          </div>
+                          <div style={{ fontSize: "0.85rem", color: "#6d6d6d", marginTop: "4px" }}>
+                            {dateDisplay} • <span style={{ fontWeight: 600 }}>{timeDisplay}</span>
+                          </div>
+                        </div>
+                        <div>{statusChip}</div>
+                      </div>
+                      <div
+                        style={{
+                          display: "grid",
+                          gridTemplateColumns: "repeat(2, minmax(0, 1fr))",
+                          gap: "12px",
+                          marginTop: "12px",
+                        }}
+                      >
+                        {mobileInfoItems.map((item) => (
+                          <div
+                            key={`${rowKey}-${item.label}`}
+                            style={{
+                              display: "flex",
+                              flexDirection: "column",
+                              gap: "4px",
+                            }}
+                          >
+                            <span
+                              style={{
+                                fontSize: "0.68rem",
+                                letterSpacing: "0.18em",
+                                textTransform: "uppercase",
+                                color: "#9a9a9a",
+                              }}
+                            >
+                              {item.label}
+                            </span>
+                            <span style={{ fontSize: "0.95rem", fontWeight: 500 }}>
+                              {item.value || "-"}
+                            </span>
+                          </div>
+                        ))}
+                      </div>
+                      <div style={{ marginTop: "14px" }}>{actionButtons}</div>
                     </div>
+                  ) : (
                     <div
                       style={{
-                        display: "flex",
-                        gap: "12px",
+                        display: "grid",
+                        gridTemplateColumns: tableColumnTemplate,
+                        padding: "18px 22px",
+                        borderBottom: isExpanded
+                          ? "none"
+                          : `1px solid ${adminTheme.palette.border}`,
+                        gap: "10px",
                         alignItems: "center",
-                        flexWrap: "wrap",
+                        fontFamily: adminTheme.fonts.body,
+                        fontSize: "0.9rem",
+                        color: "#333",
                       }}
                     >
-                      <button
-                        type="button"
-                        style={actionButtonStyle}
-                        onClick={() => handleReservationAction("edit", reservation)}
-                        aria-label="Edit reservation"
+                      <div style={{ fontSize: "0.95rem", fontWeight: 600 }}>{displayPosition}</div>
+                      <div style={{ fontSize: "0.85rem", fontWeight: 500 }}>{phoneDisplay}</div>
+                      <div style={{ fontSize: "0.85rem", fontWeight: 500 }}>{dateDisplay}</div>
+                      <div style={{ fontSize: "0.85rem", fontWeight: 600 }}>{timeDisplay}</div>
+                      <div
+                        style={{
+                          fontSize: "0.85rem",
+                          fontWeight: 600,
+                          justifySelf: "start",
+                          marginLeft: "-20px",
+                        }}
                       >
-                        <img src={actionIcons.edit} alt="" style={{ width: 18, height: 18 }} />
-                      </button>
-                      <button
-                        type="button"
-                        style={cancelButtonStyle}
-                        disabled={isStatusMutating}
-                        onClick={() =>
-                          handleReservationAction(isCancelled ? "revert" : "cancel", reservation)
-                        }
-                        aria-label={isCancelled ? "Reinstate reservation" : "Cancel reservation"}
+                        {guestTotal}
+                      </div>
+                      <div
+                        style={{
+                          fontSize: "0.78rem",
+                          fontWeight: 600,
+                          justifySelf: "start",
+                          marginLeft: "-16px",
+                          color: tableMeta ? "#1d1d1d" : "#9a9a9a",
+                        }}
                       >
-                        <img
-                          src={cancelIconSrc}
-                          alt=""
-                          style={{ width: 18, height: 18 }}
-                        />
-                      </button>
-                      <button
-                        type="button"
-                        style={actionButtonStyle}
-                        onClick={() => handleApproveClick(reservation)}
-                        aria-label="Approve reservation"
-                      >
-                        <img src={approveIconSrc} alt="" style={{ width: 18, height: 18 }} />
-                      </button>
-                      <button
-                        type="button"
-                        style={actionButtonStyle}
-                        onClick={() => handleReservationAction("more", reservation)}
-                        aria-label="More actions"
-                      >
-                        <img src={actionIcons.more} alt="" style={{ width: 18, height: 18 }} />
-                      </button>
+                        {tableLabel}
+                        {tablePosition && (
+                          <div
+                            style={{
+                              fontSize: "0.7rem",
+                              fontWeight: 500,
+                              color: "#7a7a7a",
+                            }}
+                          >
+                            {tablePosition}
+                          </div>
+                        )}
+                      </div>
+                      {statusChip}
+                      {actionButtons}
                     </div>
-                  </div>
+                  )}
                   {isExpanded && (
                     <div
                       style={{
-                        padding: "16px 32px 24px",
+                        padding: windowWidth <= 640 ? "16px 18px 24px" : "16px 32px 24px",
                         background: "#fafafa",
                         borderBottom: `1px solid ${adminTheme.palette.border}`,
                         display: "grid",

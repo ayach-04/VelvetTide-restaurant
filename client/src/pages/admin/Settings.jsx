@@ -55,7 +55,7 @@ export default function Settings() {
   const [profileBaseline, setProfileBaseline] = useState(() => mapAdminToFormState(storedAdmin));
   const [hasCachedProfile, setHasCachedProfile] = useState(initialCachedProfile);
   const hasCachedProfileRef = useRef(initialCachedProfile);
-  const [passwords, setPasswords] = useState({ password: "", confirmPassword: "" });
+  const [passwords, setPasswords] = useState({ password: "", confirmPassword: "", currentPassword: "" });
   const [status, setStatus] = useState({ message: "", tone: "" });
   const [loading, setLoading] = useState(!initialCachedProfile);
   const [saving, setSaving] = useState(false);
@@ -197,6 +197,7 @@ export default function Settings() {
     const email = formState.email.trim().toLowerCase();
     const newPassword = passwords.password.trim();
     const confirmPassword = passwords.confirmPassword.trim();
+    const currentPassword = passwords.currentPassword.trim();
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
     if (!firstName || !lastName) {
@@ -209,13 +210,22 @@ export default function Settings() {
       return;
     }
 
-    if (newPassword || confirmPassword) {
+    const isUpdatingPassword = Boolean(newPassword || confirmPassword || currentPassword);
+    if (isUpdatingPassword) {
+      if (!newPassword || !confirmPassword) {
+        setStatus({ tone: "error", message: "Enter and confirm the new password." });
+        return;
+      }
       if (newPassword.length < 8) {
         setStatus({ tone: "error", message: "Password must be at least 8 characters long." });
         return;
       }
       if (newPassword !== confirmPassword) {
         setStatus({ tone: "error", message: "Password confirmation does not match." });
+        return;
+      }
+      if (!currentPassword) {
+        setStatus({ tone: "error", message: "Current password is required to change your password." });
         return;
       }
     }
@@ -226,8 +236,9 @@ export default function Settings() {
       email,
     };
 
-    if (newPassword) {
+    if (isUpdatingPassword) {
       payload.password = newPassword;
+      payload.current_password = currentPassword;
     }
 
     if (!profileBaseline || profileBaseline.avatar !== formState.avatar) {
@@ -263,7 +274,7 @@ export default function Settings() {
         localStorage.setItem("adminProfile", JSON.stringify(normalizedAdmin));
         notifyAdminProfileUpdate(normalizedAdmin);
       }
-      setPasswords({ password: "", confirmPassword: "" });
+      setPasswords({ password: "", confirmPassword: "", currentPassword: "" });
       setStatus({ tone: "success", message: "Profile updated successfully." });
     } catch (error) {
       setStatus({ tone: "error", message: error.message });
@@ -478,6 +489,26 @@ export default function Settings() {
                   <p style={{ margin: 0, color: adminTheme.palette.textMuted, fontSize: "0.9rem" }}>
                     Leave blank to keep your current password.
                   </p>
+                </div>
+                <div
+                  style={{
+                    marginBottom: "18px",
+                    width: "100%",
+                    maxWidth: condensedGridBase.maxWidth,
+                  }}
+                >
+                  <label htmlFor="currentPassword" style={fieldLabelStyle}>
+                    Current password
+                  </label>
+                  <input
+                    id="currentPassword"
+                    name="currentPassword"
+                    type="password"
+                    style={textInputStyle}
+                    value={passwords.currentPassword}
+                    onChange={handlePasswordChange}
+                    disabled={disableActions}
+                  />
                 </div>
                 <div style={passwordFieldsGridStyle}>
                   <div style={twoColumnFieldWrapper()}>

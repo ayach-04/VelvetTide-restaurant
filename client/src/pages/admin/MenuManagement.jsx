@@ -343,6 +343,94 @@ export default function MenuManagement() {
   const menuTableColumnTemplate =
 
     windowWidth <= 1024 ? menuTableColumnTemplateMobile : menuTableColumnTemplateDesktop;
+  const isMobileMenuTable = windowWidth <= 640;
+  const isCompactAdminView = windowWidth <= 768;
+
+  const renderMenuActionButtons = (compact = false) => (
+    <div
+      style={{
+        display: "flex",
+        gap: "10px",
+        flexWrap: compact ? "nowrap" : "wrap",
+        width: compact ? "100%" : "auto",
+        justifyContent: compact ? "flex-start" : "flex-start",
+      }}
+    >
+      <button
+        type="button"
+        onClick={handleRefresh}
+        disabled={isLoading || isRefreshing}
+        aria-label="Refresh menu"
+        style={
+          compact
+            ? {
+                width: 46,
+                height: 46,
+                borderRadius: "50%",
+                border: "1px solid rgba(0,0,0,0.1)",
+                background: adminTheme.gradients.ink,
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                padding: 0,
+                opacity: isLoading || isRefreshing ? 0.7 : 1,
+                cursor: isLoading || isRefreshing ? "not-allowed" : "pointer",
+              }
+            : buttonStyle("secondary", {
+                padding: "10px 18px",
+                background: adminTheme.gradients.ink,
+                boxShadow: "none",
+                display: "inline-flex",
+                alignItems: "center",
+                gap: "8px",
+              })
+        }
+      >
+        <img
+          src="/Icons/refresh.png"
+          alt=""
+          style={{ width: 18, height: 18, opacity: 0.9 }}
+        />
+        {!compact && (isRefreshing ? "Refreshing..." : "Refresh")}
+      </button>
+      <button
+        type="button"
+        onClick={openCreateForm}
+        aria-label="Add dish"
+        style={
+          compact
+            ? {
+                width: 46,
+                height: 46,
+                borderRadius: "50%",
+                border: "none",
+                background: "#5ea34d",
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                color: "#fff",
+                fontWeight: 700,
+                fontSize: "1.2rem",
+                padding: 0,
+              }
+            : buttonStyle("primary", {
+                padding: "12px 20px",
+                background: "#5ea34d",
+                boxShadow: "none",
+                display: "inline-flex",
+                alignItems: "center",
+                gap: "6px",
+              })
+        }
+      >
+        {compact ? "+" : (
+          <>
+            <span style={{ fontSize: "1.1rem", fontWeight: 600 }}>+</span> Add Dish
+          </>
+        )}
+      </button>
+    </div>
+  );
 
   const [isFormOpen, setIsFormOpen] = useState(false);
 
@@ -763,6 +851,102 @@ export default function MenuManagement() {
 
   }, [menuItems, categoryOptions]);
 
+  const availabilityCounts = useMemo(() => {
+
+    let available = 0;
+
+    let unavailable = 0;
+
+    menuItems.forEach((item) => {
+
+      if (item.available) {
+
+        available += 1;
+
+      } else {
+
+        unavailable += 1;
+
+      }
+
+    });
+
+    return {
+
+      all: menuItems.length,
+
+      available,
+
+      unavailable,
+
+    };
+
+  }, [menuItems]);
+
+  const categoryCounts = useMemo(() => {
+
+    const counts = { all: menuItems.length };
+
+    menuItems.forEach((item) => {
+
+      if (!item.category) return;
+
+      counts[item.category] = (counts[item.category] || 0) + 1;
+
+    });
+
+    return counts;
+
+  }, [menuItems]);
+
+  const mobileFilterChips = useMemo(() => {
+    const chips = [
+      {
+        id: "filter-all",
+        label: "All filters",
+        count: menuItems.length,
+        type: "all",
+      },
+      ...availabilityFilterOptions
+        .filter((option) => option.value !== "all")
+        .map((option) => ({
+          id: `status-${option.value}`,
+          label: option.label,
+          count:
+            option.value === "available"
+              ? availabilityCounts.available
+              : availabilityCounts.unavailable,
+          type: "status",
+          value: option.value,
+        })),
+      ...categoryOptions
+        .filter((option) => option !== "all")
+        .map((option) => ({
+          id: `category-${option}`,
+          label: option || "Unassigned",
+          count: categoryCounts[option] || 0,
+          type: "category",
+          value: option,
+        })),
+    ];
+    return chips;
+  }, [menuItems.length, availabilityCounts, categoryCounts, categoryOptions]);
+
+  const handleMobileFilterClick = (chip) => {
+    if (chip.type === "all") {
+      setAvailabilityFilter("all");
+      setCategoryFilter("all");
+      return;
+    }
+    if (chip.type === "status") {
+      setAvailabilityFilter(chip.value);
+      return;
+    }
+    if (chip.type === "category") {
+      setCategoryFilter(chip.value);
+    }
+  };
+
   const handleRefresh = () => fetchMenuItems({ isSoft: true });
 
   const openCreateForm = () => {
@@ -1015,6 +1199,24 @@ export default function MenuManagement() {
 
     setExpandedItemId((prev) => (prev === itemId ? null : itemId));
 
+  const pagePadding = isMobileMenuTable ? "0 18px 50px" : "0 8px 60px";
+  const outerPadding = isCompactAdminView ? "0 16px 50px" : pagePadding;
+  const compactContentStyle = isCompactAdminView
+    ? { width: "100%", maxWidth: "560px", margin: "0 auto" }
+    : null;
+  const tableCardOverrides = {
+    padding: 0,
+    overflow: "hidden",
+    borderRadius: 0,
+    boxShadow: isCompactAdminView ? "none" : undefined,
+  };
+  const tableHeaderPadding = isCompactAdminView ? "14px 18px" : "14px 26px";
+  const tableMinWidth = isCompactAdminView ? "0" : "860px";
+  const actionClusterAlignment = isCompactAdminView ? "flex-end" : "flex-start";
+  const actionClusterWrap = isCompactAdminView ? "wrap" : "nowrap";
+  const actionClusterGap = isCompactAdminView ? "10px" : "6px";
+  const isSummaryCompact = windowWidth <= 640;
+
   return (
 
     <>
@@ -1027,9 +1229,18 @@ export default function MenuManagement() {
 
           fontFamily: adminTheme.fonts.body,
 
+          padding: outerPadding,
+
+          boxSizing: "border-box",
+
+          width: "100%",
+          overflowX: "hidden",
+
         }}
 
       >
+
+        <div style={compactContentStyle || undefined}>
 
       <div style={{ marginBottom: "28px" }}>
 
@@ -1125,9 +1336,13 @@ export default function MenuManagement() {
 
               display: "flex",
 
-              flexDirection: "column",
+              flexDirection: isSummaryCompact ? "row" : "column",
 
-              gap: "6px",
+              alignItems: isSummaryCompact ? "center" : "flex-start",
+
+              justifyContent: isSummaryCompact ? "space-between" : "flex-start",
+
+              gap: isSummaryCompact ? "12px" : "6px",
 
             }}
 
@@ -1145,6 +1360,8 @@ export default function MenuManagement() {
 
                 color: adminTheme.palette.textMuted,
 
+                flex: isSummaryCompact ? "1" : "initial",
+
               }}
 
             >
@@ -1153,7 +1370,15 @@ export default function MenuManagement() {
 
             </span>
 
-            <div style={{ fontSize: "1.6rem", fontFamily: adminTheme.fonts.display }}>
+            <div
+              style={{
+                fontSize: "1.6rem",
+                fontFamily: adminTheme.fonts.display,
+                marginLeft: isSummaryCompact ? "auto" : 0,
+                textAlign: isSummaryCompact ? "right" : "left",
+                minWidth: isSummaryCompact ? "auto" : "100%",
+              }}
+            >
 
               {stat.value}
 
@@ -1203,15 +1428,21 @@ export default function MenuManagement() {
 
           gap: "14px",
 
-          alignItems: "center",
+          alignItems: "stretch",
 
-          marginBottom: "28px",
+          marginBottom: "14px",
 
         }}
 
       >
 
-        <div style={{ flex: "1 1 260px" }}>
+        <div
+          style={{
+            flex: "1 1 260px",
+            minWidth: "200px",
+            width: "100%",
+          }}
+        >
 
           <div
 
@@ -1325,73 +1556,83 @@ export default function MenuManagement() {
 
         </div>
 
-            <div style={{ display: "flex", gap: "10px", flexWrap: "wrap" }}>
-
-              <button
-
-                type="button"
-
-                onClick={handleRefresh}
-
-                disabled={isLoading || isRefreshing}
-
-                style={buttonStyle("secondary", {
-
-                  padding: "10px 18px",
-
-                  background: adminTheme.gradients.ink,
-
-                  boxShadow: "none",
-
-                })}
-
-              >
-
-                <img
-
-                  src="/Icons/refresh.png"
-
-                  alt=""
-
-                  style={{ width: 18, height: 18, opacity: isLoading || isRefreshing ? 0.6 : 1 }}
-
-                />
-
-                {isRefreshing ? "Refreshing..." : "Refresh"}
-
-              </button>
-
-              <button
-
-                type="button"
-
-                onClick={openCreateForm}
-
-                style={buttonStyle("primary", {
-
-                  padding: "12px 20px",
-
-                  background: "#5ea34d",
-
-                  boxShadow: "none",
-
-                })}
-
-              >
-
-                + Add Dish
-
-              </button>
-
-            </div>
-
-          </div>
-
         <div
           style={{
-            ...createCardStyle({ padding: 0, overflow: "hidden", borderRadius: 0 }),
+            flex: "0 0 auto",
+            display: "flex",
+            alignItems: "center",
           }}
         >
+          {renderMenuActionButtons(isMobileMenuTable)}
+        </div>
+
+      </div>
+
+      {isMobileMenuTable && (
+        <div
+          style={{
+            marginBottom: "18px",
+          }}
+        >
+          <div
+            style={{
+              display: "grid",
+              gridTemplateColumns: "repeat(2, minmax(0, 1fr))",
+              gap: "12px",
+            }}
+          >
+            {mobileFilterChips.map((chip) => {
+              const isActive =
+                chip.type === "all"
+                  ? availabilityFilter === "all" && categoryFilter === "all"
+                  : chip.type === "status"
+                  ? availabilityFilter === chip.value
+                  : categoryFilter === chip.value;
+              return (
+                <button
+                  key={chip.id}
+                  type="button"
+                  onClick={() => handleMobileFilterClick(chip)}
+                  style={{
+                    width: "100%",
+                    borderRadius: "999px",
+                    border: `1px solid ${isActive ? "#999" : "#d9d9d9"}`,
+                    background: isActive ? "#f1f1f1" : "#fff",
+                    color: "#4a4a4a",
+                    padding: "10px 18px",
+                    fontFamily: adminTheme.fonts.body,
+                    fontWeight: 700,
+                    fontSize: "0.75rem",
+                    letterSpacing: "0.2em",
+                    textTransform: "uppercase",
+                    cursor: "pointer",
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "space-between",
+                    gap: "10px",
+                    boxShadow: isActive ? "0 6px 16px rgba(0,0,0,0.08)" : "none",
+                  }}
+                >
+                  <span>{chip.label.toUpperCase()}</span>
+                  <span
+                    style={{
+                      borderRadius: "999px",
+                      padding: "2px 10px",
+                      background: isActive ? "#dcdcdc" : "#f5f5f5",
+                      fontSize: "0.7rem",
+                      letterSpacing: "normal",
+                    }}
+                  >
+                    {chip.count}
+                  </span>
+                </button>
+              );
+            })}
+          </div>
+        </div>
+      )}
+
+        <div style={createCardStyle(tableCardOverrides)}>
           <div style={{ padding: 0 }}>
 
             {isLoading ? (
@@ -1410,37 +1651,23 @@ export default function MenuManagement() {
 
               <div style={{ overflowX: "auto" }}>
 
-                <div style={{ minWidth: "860px" }}>
-
-                  <div
-
-                    style={{
-
-                      display: "grid",
-
-                      gridTemplateColumns: menuTableColumnTemplate,
-
-                      padding: "14px 26px",
-
-                      borderBottom: `1px solid ${adminTheme.palette.border}`,
-
-                      fontSize: "0.7rem",
-
-                      letterSpacing: "0.2em",
-
-                      textTransform: "uppercase",
-
-                      color: "#000",
-
-                      alignItems: "center",
-
-                      position: "relative",
-
-                      fontFamily: adminTheme.fonts.body,
-
-                    }}
-
-                  >
+                <div style={{ minWidth: tableMinWidth }}>
+                  {!isMobileMenuTable && (
+                    <div
+                      style={{
+                        display: "grid",
+                        gridTemplateColumns: menuTableColumnTemplate,
+                        padding: tableHeaderPadding,
+                        borderBottom: `1px solid ${adminTheme.palette.border}`,
+                        fontSize: "0.7rem",
+                        letterSpacing: "0.2em",
+                        textTransform: "uppercase",
+                        color: "#000",
+                        alignItems: "center",
+                        position: "relative",
+                        fontFamily: adminTheme.fonts.body,
+                      }}
+                    >
 
                     <span>#</span>
 
@@ -1867,359 +2094,274 @@ export default function MenuManagement() {
                     </div>
 
                     <span style={{ textAlign: "left", letterSpacing: "0.2em" }}>Actions</span>
-
-                  </div>
+                    </div>
+                  )
+}
 
                   {paginatedItems.map((item, index) => {
-
                     const rowKey = item._id || index;
-
                     const rowNumber = (safeCurrentPage - 1) * ITEMS_PER_PAGE + index + 1;
-
+                    const rowLabel = String(rowNumber).padStart(2, "0");
                     const isExpanded = expandedItemId === item._id;
+                    const statusChip = (
+                      <span
+                        style={createChipStyle(item.available ? "success" : "danger", {
+                          textTransform: "none",
+                          letterSpacing: "0.02em",
+                          fontSize: "0.8rem",
+                          padding: "6px 14px",
+                        })}
+                      >
+                        {item.available ? "Available" : "Offline"}
+                      </span>
+                    );
+                    const actionButtons = (
+                      <div
+                        style={{
+                          display: "flex",
+                          flexDirection: "row",
+                          justifyContent: isMobileMenuTable ? "flex-start" : actionClusterAlignment,
+                          alignItems: "center",
+                          gap: actionClusterGap,
+                          flexWrap: actionClusterWrap,
+                          justifySelf: isMobileMenuTable ? "flex-start" : actionClusterAlignment,
+                          alignSelf: "center",
+                        }}
+                      >
+                        <button
+                          type="button"
+                          onClick={(event) => {
+                            event.stopPropagation();
+                            handleToggleAvailability(item);
+                          }}
+                          disabled={updatingAvailabilityId === item._id}
+                          style={{
+                            ...rowActionButtonStyle,
+                            opacity: updatingAvailabilityId === item._id ? 0.5 : 1,
+                            cursor: updatingAvailabilityId === item._id ? "not-allowed" : "pointer",
+                          }}
+                        >
+                          {updatingAvailabilityId === item._id ? (
+                            <span style={{ fontSize: "0.7rem", fontWeight: 600 }}>...</span>
+                          ) : (
+                            <img
+                              src={item.available ? "/Icons/power.png" : "/Icons/power (1).png"}
+                              alt={item.available ? "Set offline" : "Set live"}
+                              style={{ width: 16, height: 16 }}
+                            />
+                          )}
+                        </button>
+                        <button
+                          type="button"
+                          onClick={(event) => {
+                            event.stopPropagation();
+                            openEditForm(item);
+                          }}
+                          style={rowActionButtonStyle}
+                        >
+                          <img src="/Icons/edit.png" alt="" style={{ width: 16, height: 16 }} />
+                        </button>
+                        <button
+                          type="button"
+                          onClick={(event) => {
+                            event.stopPropagation();
+                            promptDeleteItem(item);
+                          }}
+                          style={rowActionButtonStyle}
+                        >
+                          <img src="/Icons/trash.png" alt="" style={{ width: 16, height: 16 }} />
+                        </button>
+                        <button
+                          type="button"
+                          onClick={(event) => {
+                            event.stopPropagation();
+                            toggleRowExpansion(item._id);
+                          }}
+                          style={{
+                            ...rowActionButtonStyle,
+                            transform: isExpanded ? "rotate(180deg)" : "rotate(0deg)",
+                          }}
+                        >
+                          <img src="/Icons/arrow-down.png" alt="" style={{ width: 14, height: 14 }} />
+                        </button>
+                      </div>
+                    );
+                    const mobileInfoItems = [
+                      { label: "Category", value: item.category || "-" },
+                      { label: "Subcategory", value: item.subcategory || "Chef's selection" },
+                      { label: "Price", value: formatCurrency(item.price) },
+                    ];
 
                     return (
-
                       <React.Fragment key={rowKey}>
-
-                        <div
-
-                          onClick={() => toggleRowExpansion(item._id)}
-
-                          style={{
-
-                            display: "grid",
-
-                            gridTemplateColumns: menuTableColumnTemplate,
-
-                            alignItems: "center",
-
-                            padding: windowWidth <= 640 ? "18px 16px" : "22px 32px",
-
-                            borderBottom: `1px solid ${adminTheme.palette.border}`,
-
-                            backgroundColor: "#fff",
-
-                            transition: "background 0.2s ease",
-
-                            cursor: "pointer",
-
-                          }}
-
-                        >
-
-                          <div style={{ fontWeight: 700 }}>
-
-                            {String(rowNumber).padStart(2, "0")}
-
-                          </div>
-
-                          <div style={dishPrimaryTextStyle}>{formatDishName(item.name)}</div>
-
-                          <div style={{ display: "flex", flexDirection: "column", gap: "6px" }}>
-
-                            <span
-
-                              style={categoryValueStyle}
-
-                            >
-
-                              {item.category || "-"}
-
-                            </span>
-
-                            <span
-
-                              style={{
-
-                                fontSize: "0.75rem",
-
-                                color: adminTheme.palette.textMuted,
-
-                              }}
-
-                            >
-
-                              {item.subcategory || "Chef's selection"}
-
-                            </span>
-
-                          </div>
-
-                          <div style={{ fontWeight: 700 }}>{formatCurrency(item.price)}</div>
-
-                          <div>
-
-                            <span
-
-                              style={createChipStyle(item.available ? "success" : "danger", {
-
-                                textTransform: "none",
-
-                                letterSpacing: "0.02em",
-
-                                fontSize: "0.8rem",
-
-                                padding: "6px 14px",
-
-                              })}
-
-                            >
-
-                              {item.available ? "Available" : "Offline"}
-
-                            </span>
-
-                          </div>
-
+                        {isMobileMenuTable ? (
                           <div
-
+                            onClick={() => toggleRowExpansion(item._id)}
                             style={{
-
+                              padding: "18px 16px",
+                              borderBottom: `1px solid ${adminTheme.palette.border}`,
+                              backgroundColor: "#fff",
+                              cursor: "pointer",
                               display: "flex",
-
-                              justifyContent: "flex-end",
-
-                              gap: "10px",
-
-                              flexWrap: "wrap",
-
-                              justifySelf: "flex-end",
-
+                              flexDirection: "column",
+                              gap: "14px",
                             }}
-
                           >
-
-                            <button
-
-                              type="button"
-
-                              onClick={(event) => {
-
-                                event.stopPropagation();
-
-                                handleToggleAvailability(item);
-
-                              }}
-
-                              disabled={updatingAvailabilityId === item._id}
-
+                            <div
                               style={{
-
-                                ...rowActionButtonStyle,
-
-                                opacity: updatingAvailabilityId === item._id ? 0.5 : 1,
-
-                                cursor: updatingAvailabilityId === item._id ? "not-allowed" : "pointer",
-
+                                display: "grid",
+                                gridTemplateColumns: "minmax(0, 1fr) auto",
+                                gap: "12px",
+                                alignItems: "flex-start",
                               }}
-
                             >
-
-                              {updatingAvailabilityId === item._id ? (
-
-                                <span style={{ fontSize: "0.7rem", fontWeight: 600 }}>...</span>
-
-                              ) : (
-
-                                <img
-
-                                  src={item.available ? "/Icons/power.png" : "/Icons/power (1).png"}
-
-                                  alt={item.available ? "Set offline" : "Set live"}
-
-                                  style={{ width: 16, height: 16 }}
-
-                                />
-
-                              )}
-
-                            </button>
-
-                            <button
-
-                              type="button"
-
-                              onClick={(event) => {
-
-                                event.stopPropagation();
-
-                                openEditForm(item);
-
-                              }}
-
-                              style={rowActionButtonStyle}
-
-                            >
-
-                              <img src="/Icons/edit.png" alt="" style={{ width: 16, height: 16 }} />
-
-                            </button>
-
-                            <button
-
-                              type="button"
-
-                              onClick={(event) => {
-
-                                event.stopPropagation();
-
-                                promptDeleteItem(item);
-
-                              }}
-
-                              style={rowActionButtonStyle}
-
-                            >
-
-                              <img src="/Icons/trash.png" alt="" style={{ width: 16, height: 16 }} />
-
-                            </button>
-
-                            <button
-
-                              type="button"
-
-                              onClick={(event) => {
-
-                                event.stopPropagation();
-
-                                toggleRowExpansion(item._id);
-
-                              }}
-
+                              <div>
+                                <div style={{ fontSize: "0.85rem", fontWeight: 600, marginBottom: "4px" }}>
+                                  #{rowLabel}
+                                </div>
+                                <div style={dishPrimaryTextStyle}>{formatDishName(item.name)}</div>
+                                <div
+                                  style={{
+                                    fontSize: "0.75rem",
+                                    color: adminTheme.palette.textMuted,
+                                    marginTop: "4px",
+                                  }}
+                                >
+                                  {item.subcategory || "Chef's selection"}
+                                </div>
+                              </div>
+                              <div
+                                style={{
+                                  display: "flex",
+                                  flexDirection: "column",
+                                  alignItems: "flex-end",
+                                  gap: "10px",
+                                }}
+                              >
+                                {statusChip}
+                              </div>
+                            </div>
+                            <div
                               style={{
-
-                                ...rowActionButtonStyle,
-
-                                transform: isExpanded ? "rotate(180deg)" : "rotate(0deg)",
-
+                                display: "grid",
+                                gridTemplateColumns: "repeat(2, minmax(0, 1fr))",
+                                gap: "12px",
                               }}
-
                             >
-
-                              <img src="/Icons/arrow-down.png" alt="" style={{ width: 14, height: 14 }} />
-
-                            </button>
-
+                              {mobileInfoItems.map((meta) => (
+                                <div
+                                  key={`${rowKey}-${meta.label}`}
+                                  style={{ display: "flex", flexDirection: "column", gap: "4px" }}
+                                >
+                                  <span
+                                    style={{
+                                      fontSize: "0.68rem",
+                                      letterSpacing: "0.18em",
+                                      textTransform: "uppercase",
+                                      color: "#9a9a9a",
+                                    }}
+                                  >
+                                    {meta.label}
+                                  </span>
+                                  <span style={{ fontWeight: 600 }}>{meta.value}</span>
+                                </div>
+                              ))}
+                            </div>
+                            <div
+                              style={{
+                                marginTop: "8px",
+                                display: "flex",
+                                justifyContent: "flex-start",
+                              }}
+                            >
+                              {actionButtons}
+                            </div>
                           </div>
-
-                        </div>
+                        ) : (
+                          <div
+                            onClick={() => toggleRowExpansion(item._id)}
+                            style={{
+                              display: "grid",
+                              gridTemplateColumns: menuTableColumnTemplate,
+                              alignItems: "center",
+                              padding: windowWidth <= 640 ? "18px 16px" : "22px 32px",
+                              borderBottom: `1px solid ${adminTheme.palette.border}`,
+                              backgroundColor: "#fff",
+                              transition: "background 0.2s ease",
+                              cursor: "pointer",
+                            }}
+                          >
+                            <div style={{ fontWeight: 700 }}>{rowLabel}</div>
+                            <div style={dishPrimaryTextStyle}>{formatDishName(item.name)}</div>
+                            <div style={{ display: "flex", flexDirection: "column", gap: "6px" }}>
+                              <span style={categoryValueStyle}>{item.category || "-"}</span>
+                              <span
+                                style={{
+                                  fontSize: "0.75rem",
+                                  color: adminTheme.palette.textMuted,
+                                }}
+                              >
+                                {item.subcategory || "Chef's selection"}
+                              </span>
+                            </div>
+                            <div style={{ fontWeight: 700 }}>{formatCurrency(item.price)}</div>
+                            <div>{statusChip}</div>
+                            {actionButtons}
+                          </div>
+                        )}
 
                         {isExpanded && (
-
                           <div
-
                             style={{
-
                               padding: windowWidth <= 640 ? "16px 20px 24px" : "16px 32px 24px",
-
                               background: "#fafafa",
-
                               borderBottom: `1px solid ${adminTheme.palette.border}`,
-
                               display: "grid",
-
                               gridTemplateColumns:
-
                                 windowWidth <= 640 ? "1fr" : "repeat(3, minmax(0, 1fr))",
-
                               gap: "18px",
-
                               fontFamily: adminTheme.fonts.body,
-
                             }}
-
                           >
-
-                            {[
-
-                              { label: "Category", value: item.category || "-" },
-
-                              { label: "Subcategory", value: item.subcategory || "-" },
-
-                              {
-
-                                label: "Last update",
-
-                                value: formatTimestamp(item.updatedAt || item.createdAt),
-
-                              },
-
-                              { label: "Created", value: formatTimestamp(item.createdAt) },
-
-                            ].map((meta) => (
-
-                              <div
-
-                                key={`${rowKey}-${meta.label}`}
-
-                                style={{ display: "flex", flexDirection: "column", gap: "4px" }}
-
-                              >
-
-                                <span
-
-                                  style={{
-
-                                    fontSize: "0.7rem",
-
-                                    letterSpacing: "0.2em",
-
-                                    textTransform: "uppercase",
-
-                                    color: "#9a9a9a",
-
-                                  }}
-
-                                >
-
-                                  {meta.label}
-
-                                </span>
-
-                                <span style={{ fontWeight: 600 }}>{meta.value}</span>
-
-                              </div>
-
-                            ))}
-
                             <div style={{ gridColumn: "1 / -1" }}>
-
                               <span
-
                                 style={{
-
                                   fontSize: "0.7rem",
-
                                   letterSpacing: "0.2em",
-
                                   textTransform: "uppercase",
-
                                   color: "#9a9a9a",
-
                                 }}
-
                               >
-
                                 Description
-
                               </span>
-
                               <p style={{ marginTop: "6px", color: "#555", lineHeight: 1.5 }}>
-
                                 {item.description && item.description.trim()
-
                                   ? item.description
-
                                   : "No additional notes provided."}
-
                               </p>
-
                             </div>
-
+                            <div
+                              style={{
+                                display: "flex",
+                                flexDirection: "column",
+                                gap: "4px",
+                              }}
+                            >
+                              <span
+                                style={{
+                                  fontSize: "0.7rem",
+                                  letterSpacing: "0.2em",
+                                  textTransform: "uppercase",
+                                  color: "#9a9a9a",
+                                }}
+                              >
+                                Last update
+                              </span>
+                              <span style={{ fontWeight: 600 }}>
+                                {formatTimestamp(item.updatedAt || item.createdAt)}
+                              </span>
+                            </div>
                           </div>
-
                         )}
 
                       </React.Fragment>
@@ -2360,6 +2502,8 @@ export default function MenuManagement() {
 
         </div>
       </>
+
+        </div>
 
       </div>
 
@@ -3113,5 +3257,6 @@ export default function MenuManagement() {
   );
 
 }
+
 
 
