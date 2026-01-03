@@ -22,7 +22,7 @@ import {
 
 } from "./adminTheme";
 
-const API_BASE_URL = 'https://velvettide-restaurant.onrender.com";
+const API_BASE_URL = "https://velvettide-restaurant.onrender.com";
 
 const ITEMS_PER_PAGE = 10;
 const MENU_CACHE_KEY = "adminMenuCache";
