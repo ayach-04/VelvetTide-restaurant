@@ -10,7 +10,7 @@ import {
   underlineStyle,
 } from "./adminTheme";
 
-const API_BASE_URL = import.meta.env.VITE_API_URL || "http://localhost:5000";
+const API_BASE_URL = 'https://velvettide-restaurant.onrender.com";
 const RESERVATION_FETCH_LIMIT = 250;
 const RESERVATIONS_CACHE_KEY = "adminReservationsCache";
 
