@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 
-const API_BASE_URL = 'https://velvettide-restaurant.onrender.com";
+const API_BASE_URL = "https://velvettide-restaurant.onrender.com";
 
 const Contact = () => {
   const [formData, setFormData] = useState({
