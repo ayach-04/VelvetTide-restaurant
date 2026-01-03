@@ -85,6 +85,7 @@ export default function Messages() {
 
   const fetchControllerRef = useRef(null);
   const requestIdRef = useRef(0);
+  const detailSectionRef = useRef(null);
   const [messages, setMessagesState] = useState(cacheRef.current?.messages || []);
   const [selectedMessage, setSelectedMessage] = useState(null);
   const [isLoading, setIsLoading] = useState(cacheRef.current === null);
@@ -334,8 +335,17 @@ export default function Messages() {
     markMessageAsRead(selectedMessage);
   }, [selectedMessage]);
 
+  const handleSelectMessage = (message) => {
+    setSelectedMessage(message);
+    markMessageAsRead(message);
+    if (windowWidth <= 768 && detailSectionRef.current) {
+      detailSectionRef.current.scrollIntoView({ behavior: "smooth", block: "start" });
+    }
+  };
+
   const layoutColumns =
     windowWidth <= 960 ? "1fr" : "minmax(320px, 0.35fr) minmax(0, 1fr)";
+  const isCompactRefreshButton = windowWidth <= 640;
 
   return (
     <div style={{ color: adminTheme.palette.contrast }}>
@@ -357,25 +367,46 @@ export default function Messages() {
             type="button"
             onClick={() => fetchMessages({ isSoftRefresh: true })}
             disabled={isRefreshing}
-            style={{
-              border: "none",
-              borderRadius: "999px",
-              backgroundColor: "#5ea34d",
-              padding: "14px 24px",
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "center",
-              gap: "8px",
-              cursor: isRefreshing ? "not-allowed" : "pointer",
-              color: "#fff",
-              fontFamily: adminTheme.fonts.body,
-              fontWeight: 700,
-              letterSpacing: "0.05em",
-              fontSize: "0.9rem",
-            }}
+            aria-label={isRefreshing ? "Refreshing messages..." : "Refresh messages"}
+            title={isRefreshing ? "Refreshing..." : "Refresh"}
+            style={
+              isCompactRefreshButton
+                ? {
+                    width: 44,
+                    height: 44,
+                    borderRadius: "50%",
+                    border: "1px solid rgba(0,0,0,0.12)",
+                    backgroundColor: "#000",
+                    display: "inline-flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    padding: 0,
+                    cursor: isRefreshing ? "not-allowed" : "pointer",
+                    opacity: isRefreshing ? 0.6 : 1,
+                    transition: "opacity 0.2s ease",
+                  }
+                : {
+                    border: "none",
+                    borderRadius: "999px",
+                    backgroundColor: "#000",
+                    padding: "14px 24px",
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    gap: "8px",
+                    cursor: isRefreshing ? "not-allowed" : "pointer",
+                    color: "#fff",
+                    fontFamily: adminTheme.fonts.body,
+                    fontWeight: 700,
+                    letterSpacing: "0.05em",
+                    fontSize: "0.9rem",
+                    opacity: isRefreshing ? 0.8 : 1,
+                    transition: "opacity 0.2s ease",
+                  }
+            }
           >
             <img src="/Icons/refresh.png" alt="" style={{ width: 18, height: 18 }} />
-            {isRefreshing ? "Refreshing…" : "Refresh"}
+            {!isCompactRefreshButton && (isRefreshing ? "Refreshing..." : "Refresh")}
           </button>
         </div>
       </div>
@@ -495,10 +526,7 @@ export default function Messages() {
                     >
                       <button
                         type="button"
-                        onClick={() => {
-                          setSelectedMessage(message);
-                          markMessageAsRead(message);
-                        }}
+                        onClick={() => handleSelectMessage(message)}
                         style={{
                           border: "none",
                           background: "transparent",
@@ -578,7 +606,7 @@ export default function Messages() {
           </div>
         </div>
 
-        <div style={createCardStyle({ minHeight: "480px" })}>
+        <div ref={detailSectionRef} style={createCardStyle({ minHeight: "480px" })}>
           {!selectedMessage ? (
             <div
               style={{

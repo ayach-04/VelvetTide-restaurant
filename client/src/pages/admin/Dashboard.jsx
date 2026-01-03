@@ -688,6 +688,7 @@ export default function Dashboard() {
   const isKpiCompact = windowWidth <= 640;
   const mainGridTemplate =
     windowWidth <= 1080 ? "1fr" : "minmax(0, 1.8fr) minmax(0, 1fr)";
+  const isCompactRefreshButton = windowWidth <= 640;
 
   return (
     <div style={{ display: "flex", flexDirection: "column", gap: "28px" }}>
@@ -716,26 +717,48 @@ export default function Dashboard() {
               disabled={isRefreshing}
               aria-label={isRefreshing ? "Refreshing data..." : "Refresh dashboard"}
               title={isRefreshing ? "Refreshing..." : "Refresh"}
-              style={{
-                width: 44,
-                height: 44,
-                borderRadius: "50%",
-                border: "1px solid rgba(0,0,0,0.12)",
-                background: adminTheme.gradients.ink,
-                display: "inline-flex",
-                alignItems: "center",
-                justifyContent: "center",
-                padding: 0,
-                cursor: isRefreshing ? "not-allowed" : "pointer",
-                opacity: isRefreshing ? 0.6 : 1,
-                transition: "opacity 0.2s ease",
-              }}
+              style={
+                isCompactRefreshButton
+                  ? {
+                      width: 44,
+                      height: 44,
+                      borderRadius: "50%",
+                      border: "1px solid rgba(0,0,0,0.12)",
+                      backgroundColor: "#000",
+                      display: "inline-flex",
+                      alignItems: "center",
+                      justifyContent: "center",
+                      padding: 0,
+                      cursor: isRefreshing ? "not-allowed" : "pointer",
+                      opacity: isRefreshing ? 0.6 : 1,
+                      transition: "opacity 0.2s ease",
+                    }
+                  : {
+                      border: "none",
+                      borderRadius: "999px",
+                      backgroundColor: "#000",
+                      padding: "14px 24px",
+                      display: "flex",
+                      alignItems: "center",
+                      justifyContent: "center",
+                      gap: "8px",
+                      cursor: isRefreshing ? "not-allowed" : "pointer",
+                      color: "#fff",
+                      fontFamily: adminTheme.fonts.body,
+                      fontWeight: 700,
+                      letterSpacing: "0.05em",
+                      fontSize: "0.9rem",
+                      opacity: isRefreshing ? 0.8 : 1,
+                      transition: "opacity 0.2s ease",
+                    }
+              }
             >
               <img
                 src="/Icons/refresh.png"
                 alt=""
                 style={{ width: 18, height: 18, opacity: 0.9 }}
               />
+              {!isCompactRefreshButton && (isRefreshing ? "Refreshing..." : "Refresh")}
             </button>
           </div>
           <div style={underlineStyle} />

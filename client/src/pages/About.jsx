@@ -3,7 +3,6 @@ import React, { useState, useEffect } from "react";
 const About = () => {
   const [windowWidth, setWindowWidth] = useState(window.innerWidth);
   const [hoveredCard, setHoveredCard] = useState(null);
-
   useEffect(() => {
     const handleResize = () => setWindowWidth(window.innerWidth);
     window.addEventListener("resize", handleResize);
@@ -204,7 +203,7 @@ const About = () => {
             gridTemplateColumns: windowWidth <= 768 ? "1fr" : "1fr 1fr",
             gap: "60px",
             alignItems: "center",
-            marginTop: "-80px",
+            marginTop: windowWidth <= 768 ? "40px" : "-80px",
 
           }}
         >
@@ -499,40 +498,39 @@ const About = () => {
 const teamMembers = [
   {
     name: "OBIF FERGUSON",
-    title: "Executive Chef, Cary",
-    image: "/Photos/img1.jpg",
+    title: "Executive Chef",
+    image: "/Photos/chef 1.jpg",
   },
   {
-    name: "DIANA GUZMAN",
-    title: "General Manager, Cary",
-    image: "/Photos/img2.jpg",
-  },
-  {
-    name: "HELENA LARSON",
-    title: "Pastry Chef, Cary",
-    image: "/Photos/img3.jpg",
+    name: "DIAN GUZMAN",
+    title: "General Manager",
+    image: "/Photos/chef 4.jpg",
   },
   {
     name: "JOE BEE",
-    title: "Area Director, Cary",
-    image: "/Photos/img4.jpg",
+    title: "Head Chef",
+    image: "/Photos/chef 2.jpg",
+  },
+  {
+    name: "HELENA LARSON",
+    title: "Area Director",
+    image: "/Photos/chef 7.jpg",
   },
   {
     name: "KEVIN KRAPP",
-    title: "Area Director, Atlanta",
-    image: "/Photos/img5.jpg",
+    title: "Assistant General ",
+    image: "/Photos/chef 8.jpg",
   },
   {
     name: "VONDA FREEMAN",
     title: "Director of Beverage Programs",
-    image: "/Photos/img6.jpg",
+    image: "/Photos/chef 6.jpg",
   },
   {
     name: "STEVE PALMER",
     title: "Founder",
-    image: "/Photos/img7.jpg",
+    image: "/Photos/chef 5.jpg",
   },
 ];
 
 export default About;
-

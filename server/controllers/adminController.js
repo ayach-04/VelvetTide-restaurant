@@ -1,25 +1,15 @@
 const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
 const Admin = require("../models/Admin");
-const {
-  getAdminByEmail,
-  getAdminById,
-  invalidateAdminCache,
-} = require("../services/adminCache");
-const { toDataUrl, fromDataUrl } = require("../utils/avatarUtils");
+const { getAdminByEmail, getAdminById, invalidateAdminCache } = require("../services/adminCache");
+const { toDataUrl, isValidAvatarDataUrl } = require("../utils/avatarUtils");
 
 const ADMIN_JWT_SECRET = process.env.ADMIN_JWT_SECRET || "velvet-tide-admin-secret";
 const TOKEN_EXPIRES_IN = process.env.ADMIN_JWT_EXPIRES_IN || "12h";
 
 const DEFAULT_ADMIN_AVATAR = "";
 
-const resolveAvatarDataUrl = (avatar) => {
-  if (!avatar) return null;
-  if (typeof avatar === "string") {
-    return avatar;
-  }
-  return toDataUrl(avatar);
-};
+const resolveAvatarValue = (avatar) => toDataUrl(avatar) || DEFAULT_ADMIN_AVATAR;
 
 const buildAdminPayload = (admin) => ({
   id: admin._id,
@@ -27,7 +17,7 @@ const buildAdminPayload = (admin) => ({
   last_name: admin.last_name,
   email: admin.email,
   role: admin.role,
-  avatar: resolveAvatarDataUrl(admin.avatar) || DEFAULT_ADMIN_AVATAR,
+  avatar: resolveAvatarValue(admin.avatar),
 });
 
 const buildTokenResponse = (admin) => ({
@@ -75,12 +65,12 @@ const getCurrentAdmin = async (req, res, next) => {
 
 const updateCurrentAdmin = async (req, res, next) => {
   try {
-    const admin = await Admin.findById(req.admin.id);
+    const admin = await Admin.findById(req.admin.id).select("+password");
     if (!admin) {
       return res.status(404).json({ message: "Admin not found" });
     }
 
-    const { first_name, last_name, email, password, avatar } = req.body || {};
+    const { first_name, last_name, email, password, avatar, current_password: currentPassword } = req.body || {};
     const updates = {};
 
     if (first_name !== undefined) {
@@ -114,21 +104,27 @@ const updateCurrentAdmin = async (req, res, next) => {
 
     if (password !== undefined && password !== null && password !== "") {
       const trimmedPassword = String(password).trim();
+      const trimmedCurrent = String(currentPassword || "").trim();
       if (trimmedPassword.length < 8) {
         return res.status(400).json({ message: "Password must be at least 8 characters long" });
+      }
+      if (!trimmedCurrent) {
+        return res.status(400).json({ message: "Current password is required to set a new password" });
+      }
+      const matches = await bcrypt.compare(trimmedCurrent, admin.password || "");
+      if (!matches) {
+        return res.status(401).json({ message: "Current password is incorrect" });
       }
       updates.password = await bcrypt.hash(trimmedPassword, 10);
     }
 
     if (avatar !== undefined) {
       if (!avatar) {
-        updates.avatar = undefined;
+        updates.avatar = "";
+      } else if (isValidAvatarDataUrl(avatar)) {
+        updates.avatar = avatar.trim();
       } else {
-        const parsedAvatar = fromDataUrl(avatar);
-        if (!parsedAvatar) {
-          return res.status(400).json({ message: "Invalid avatar image" });
-        }
-        updates.avatar = parsedAvatar;
+        return res.status(400).json({ message: "Invalid avatar image" });
       }
     }
 

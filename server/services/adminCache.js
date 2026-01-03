@@ -16,13 +16,13 @@ const isEntryFresh = (entry) => entry && now() - entry.timestamp < CACHE_TTL_MS;
 
 const cloneAdmin = (admin) => {
   if (!admin) return null;
-  const avatar = toDataUrl(admin.avatar);
-  return {
+  const cloned = {
     ...admin,
     _id: admin._id?.toString ? admin._id.toString() : admin._id,
     email: normalizeEmail(admin.email),
-    avatar,
   };
+  cloned.avatar = toDataUrl(admin.avatar);
+  return cloned;
 };
 
 const cacheAdmin = (admin) => {

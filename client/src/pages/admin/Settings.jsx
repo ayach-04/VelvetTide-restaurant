@@ -316,11 +316,20 @@ export default function Settings() {
   const condensedGridBase = {
     columnGap: "24px",
     rowGap: "18px",
-      maxWidth: windowWidth <= 768 ? "100%" : "520px",
+    maxWidth: windowWidth <= 768 ? "100%" : "520px",
     justifyContent: windowWidth <= 768 ? "stretch" : "flex-start",
   };
 
   const getFieldWidth = () => (windowWidth <= 768 ? "100%" : "220px");
+  const isPhone = windowWidth <= 640;
+  const compactFieldWidth = isPhone ? "90%" : "100%";
+  const compactFieldMaxWidth = isPhone ? "360px" : condensedGridBase.maxWidth;
+  const stackedFullWidthStyle = {
+    flex: "0 0 100%",
+    width: compactFieldWidth,
+    maxWidth: compactFieldMaxWidth,
+    alignSelf: isPhone ? "center" : "stretch",
+  };
 
   const profileFieldsGridStyle = {
     flex: 1,
@@ -330,14 +339,15 @@ export default function Settings() {
     flexWrap: "wrap",
     maxWidth: condensedGridBase.maxWidth,
     justifyContent: windowWidth <= 768 ? "stretch" : "space-between",
-    alignItems: "flex-start",
+    alignItems: windowWidth <= 768 ? "center" : "flex-start",
   };
 
   const twoColumnFieldWrapper = () => ({
     flex: windowWidth <= 768 ? "0 0 100%" : "0 0 auto",
-    width: windowWidth <= 768 ? "100%" : getFieldWidth(),
-    maxWidth: windowWidth <= 768 ? "100%" : getFieldWidth(),
-    minWidth: windowWidth <= 768 ? "100%" : "180px",
+    width: windowWidth <= 768 ? compactFieldWidth : getFieldWidth(),
+    maxWidth: windowWidth <= 768 ? compactFieldMaxWidth : getFieldWidth(),
+    minWidth: windowWidth <= 768 ? compactFieldWidth : "180px",
+    alignSelf: windowWidth <= 768 ? "center" : "flex-start",
   });
 
   const passwordFieldsGridStyle = {
@@ -347,6 +357,7 @@ export default function Settings() {
     flexWrap: "wrap",
     maxWidth: condensedGridBase.maxWidth,
     justifyContent: windowWidth <= 768 ? "stretch" : "space-between",
+    alignItems: windowWidth <= 768 ? "center" : "flex-start",
   };
 
   return (
@@ -398,18 +409,33 @@ export default function Settings() {
                       style={{ width: "100%", height: "100%", objectFit: "cover" }}
                     />
                   </div>
-                  <div style={{ display: "flex", gap: "10px", flexWrap: "wrap", justifyContent: "center" }}>
+                  <div
+                    style={{
+                      display: "flex",
+                      flexDirection: "column",
+                      gap: "12px",
+                      justifyContent: "center",
+                      alignItems: "center",
+                      width: "100%",
+                    }}
+                  >
                     <button
                       type="button"
                       onClick={() => fileInputRef.current?.click()}
-                      style={buttonStyle("ghost")}
+                      style={{
+                        ...buttonStyle("ghost"),
+                        width: "auto",
+                      }}
                       disabled={disableActions}
                     >
                       Change Picture
                     </button>
                     <button
                       type="button"
-                      style={buttonStyle("secondary")}
+                      style={{
+                        ...buttonStyle("secondary"),
+                        width: "auto",
+                      }}
                       onClick={() => setFormState((prev) => ({ ...prev, avatar: "" }))}
                       disabled={disableActions}
                     >
@@ -457,10 +483,10 @@ export default function Settings() {
                       disabled={disableActions}
                     />
                   </div>
-                <div style={{ flex: "0 0 100%", maxWidth: condensedGridBase.maxWidth, width: "100%" }}>
-                    <label htmlFor="email" style={fieldLabelStyle}>
-                      Contact email
-                    </label>
+                <div style={stackedFullWidthStyle}>
+                  <label htmlFor="email" style={fieldLabelStyle}>
+                    Contact email
+                  </label>
                     <input
                       id="email"
                       name="email"
@@ -492,9 +518,8 @@ export default function Settings() {
                 </div>
                 <div
                   style={{
+                    ...stackedFullWidthStyle,
                     marginBottom: "18px",
-                    width: "100%",
-                    maxWidth: condensedGridBase.maxWidth,
                   }}
                 >
                   <label htmlFor="currentPassword" style={fieldLabelStyle}>

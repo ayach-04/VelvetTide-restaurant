@@ -25,11 +25,8 @@ const adminSchema = new mongoose.Schema(
       trim: true,
     },
     avatar: {
-      data: Buffer,
-      contentType: {
-        type: String,
-        default: "image/jpeg",
-      },
+      type: mongoose.Schema.Types.Mixed,
+      default: "",
     },
     password: {
       type: String,

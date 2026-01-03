@@ -2,12 +2,44 @@ import React, { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import ReservationPopup from "../components/ReservationPopup";
 
+const REVIEW_DATA = [
+  {
+    lines: [
+      '"I had great service and a tasty salmon Benedict for breakfast',
+      "while in town for business. I'd definitely go back for lunch or dinner.\"",
+    ],
+    author: "Brevardrox - Trip Advisor",
+  },
+  {
+    lines: [
+      '"Absolutely amazing experience! The food was exquisite and the ambiance was perfect.',
+      "Will definitely be coming back with friends and family.\"",
+    ],
+    author: "Sarah M. - Google Reviews",
+  },
+  {
+    lines: [
+      '"The best dining experience I\'ve had in years. Every dish was perfectly prepared',
+      "and beautifully presented. Outstanding service too!\"",
+    ],
+    author: "Michael R. - Yelp",
+  },
+  {
+    lines: [
+      '"A hidden gem! The atmosphere is cozy and elegant, and the menu offers something for everyone.',
+      'Highly recommend the chef\'s special!"',
+    ],
+    author: "Emily T. - Facebook",
+  },
+];
+
 export default function Home() {
   const [menuOpen, setMenuOpen] = useState(false);
   const [menusDropdownOpen, setMenusDropdownOpen] = useState(false);
   const [mobileMenusDropdownOpen, setMobileMenusDropdownOpen] = useState(false);
   const [windowWidth, setWindowWidth] = useState(window.innerWidth);
   const [isReservationOpen, setIsReservationOpen] = useState(false);
+  const [activeReviewIndex, setActiveReviewIndex] = useState(0);
 
   // Track window width for responsive design
   useEffect(() => {
@@ -34,6 +66,16 @@ export default function Home() {
       document.removeEventListener('mousedown', handleClickOutside);
     };
   }, [menusDropdownOpen]);
+
+  const activeReview = REVIEW_DATA[activeReviewIndex];
+  const handleReviewChange = (nextIndex) => {
+    const total = REVIEW_DATA.length;
+    if (!total) return;
+    const normalizedIndex = ((nextIndex % total) + total) % total;
+    setActiveReviewIndex(normalizedIndex);
+  };
+  const handleNextReview = () => handleReviewChange(activeReviewIndex + 1);
+  const handlePreviousReview = () => handleReviewChange(activeReviewIndex - 1);
 
   return (
     <>
@@ -614,7 +656,7 @@ export default function Home() {
           style={{
             position: "relative",
             width: "300px",
-            height: "430px",
+            height: "400px",
             overflow: "hidden",
             cursor: "pointer",
           }}
@@ -718,7 +760,7 @@ export default function Home() {
           style={{
             position: "relative",
             width: "300px",
-            height: "430px",
+            height: "400px",
             overflow: "hidden",
             cursor: "pointer",
           }}
@@ -822,7 +864,7 @@ export default function Home() {
           style={{
             position: "relative",
             width: "300px",
-            height: "430px",
+            height: "400px",
             overflow: "hidden",
             cursor: "pointer",
           }}
@@ -1040,6 +1082,7 @@ export default function Home() {
           padding: "80px 20px",
           marginTop: "-40px",
           textAlign: "center",
+          position: "relative",
         }}
       >
         <h2
@@ -1067,111 +1110,111 @@ export default function Home() {
           ❝
         </div>
 
-        {/* Review Text */}
-        <p
-          id="review-text"
+        <div
           style={{
-            fontSize: windowWidth <= 768 ? "0.9em" : "1.1em",
-            lineHeight: "1.8",
-            color: "#333",
-            maxWidth: "700px",
-            margin: "0 auto 30px",
-            fontFamily: "'Lato', sans-serif",
-            transition: "opacity 0.3s ease",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            gap: windowWidth <= 768 ? "12px" : "24px",
+            marginTop: windowWidth <= 768 ? "10px" : "20px",
+            flexWrap: windowWidth <= 640 ? "wrap" : "nowrap",
           }}
         >
-          "I had great service and a tasty salmon Benedict for breakfast
-          <br />
-          while in town for business. I'd definitely go back for lunch or dinner."
-        </p>
-
-        {/* Reviewer Name */}
-        <p
-          id="reviewer-name"
-          style={{
-            fontSize: windowWidth <= 768 ? "0.85em" : "0.95em",
-            color: "#666",
-            fontWeight: "600",
-            marginBottom: "25px",
-            fontFamily: "'Lato', sans-serif",
-            transition: "opacity 0.3s ease",
-          }}
-        >
-          Brevardrox - Trip Advisor
-        </p>
-
-        {/* Navigation Dots */}
-        <div style={{ display: "flex", justifyContent: "center", gap: "12px" }}>
-          {[0, 1, 2, 3].map((index) => (
-            <button
-              key={index}
-              onClick={() => {
-                const reviews = [
-                  {
-                    text: '"I had great service and a tasty salmon Benedict for breakfast while in town for business. I\'d definitely go back for lunch or dinner."',
-                    author: "Brevardrox - Trip Advisor"
-                  },
-                  {
-                    text: '"Absolutely amazing experience! The food was exquisite and the ambiance was perfect. Will definitely be coming back with friends and family."',
-                    author: "Sarah M. - Google Reviews"
-                  },
-                  {
-                    text: '"The best dining experience I\'ve had in years. Every dish was perfectly prepared and beautifully presented. Outstanding service too!"',
-                    author: "Michael R. - Yelp"
-                  },
-                  {
-                    text: '"A hidden gem! The atmosphere is cozy and elegant, and the menu offers something for everyone. Highly recommend the chef\'s special!"',
-                    author: "Emily T. - Facebook"
-                  }
-                ];
-
-                const reviewText = document.getElementById('review-text');
-                const reviewerName = document.getElementById('reviewer-name');
-
-                // Fade out
-                reviewText.style.opacity = '0';
-                reviewerName.style.opacity = '0';
-
-                setTimeout(() => {
-                  reviewText.innerHTML = reviews[index].text;
-                  reviewerName.textContent = reviews[index].author;
-
-                  // Fade in
-                  reviewText.style.opacity = '1';
-                  reviewerName.style.opacity = '1';
-                }, 300);
-
-                // Update active dot
-                document.querySelectorAll('.review-dot').forEach((dot, i) => {
-                  dot.style.backgroundColor = i === index ? '#5ea34d' : '#ddd';
-                });
-              }}
-              className="review-dot"
-              style={{
-                width: "10px",
-                height: "10px",
-                borderRadius: "50%",
-                backgroundColor: index === 0 ? "#5ea34d" : "#ddd",
-                border: "none",
-                cursor: "pointer",
-                transition: "all 0.3s ease",
-                padding: 0,
-              }}
-              onMouseOver={(e) => {
-                if (e.currentTarget.style.backgroundColor !== 'rgb(94, 163, 77)') {
-                  e.currentTarget.style.backgroundColor = '#aaa';
-                }
-              }}
-              onMouseOut={(e) => {
-                const dots = document.querySelectorAll('.review-dot');
-                const isActive = Array.from(dots).indexOf(e.currentTarget) ===
-                  Array.from(dots).findIndex(dot => dot.style.backgroundColor === 'rgb(94, 163, 77)');
-                if (!isActive) {
-                  e.currentTarget.style.backgroundColor = '#ddd';
-                }
-              }}
+          <button
+            type="button"
+            onClick={handlePreviousReview}
+            aria-label="Previous review"
+            style={{
+              background: "transparent",
+              border: "none",
+              padding: 0,
+              cursor: "pointer",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+            }}
+          >
+            <img
+              src="/Icons/right-arrow.png"
+              alt=""
+              style={{ width: 20, height: 20, transform: "rotate(180deg)" }}
             />
-          ))}
+          </button>
+
+          <div style={{ maxWidth: "700px", textAlign: "center" }}>
+            {/* Review Text */}
+            <p
+              style={{
+                fontSize: windowWidth <= 768 ? "0.9em" : "1.1em",
+                lineHeight: "1.8",
+                color: "#333",
+                margin: "0 auto 30px",
+                fontFamily: "'Lato', sans-serif",
+              }}
+            >
+              {activeReview.lines.map((line, index) => (
+                <span key={`${activeReview.author}-${index}`}>
+                  {line}
+                  {index < activeReview.lines.length - 1 && <br />}
+                </span>
+              ))}
+            </p>
+
+            {/* Reviewer Name */}
+            <p
+              style={{
+                fontSize: windowWidth <= 768 ? "0.85em" : "0.95em",
+                color: "#666",
+                fontWeight: "600",
+                marginBottom: "25px",
+                fontFamily: "'Lato', sans-serif",
+              }}
+            >
+              {activeReview.author}
+            </p>
+
+            {/* Navigation Dots */}
+            <div style={{ display: "flex", justifyContent: "center", gap: "12px" }}>
+              {REVIEW_DATA.map((_, index) => (
+                <button
+                  key={index}
+                  onClick={() => handleReviewChange(index)}
+                  className="review-dot"
+                  style={{
+                    width: "10px",
+                    height: "10px",
+                    borderRadius: "50%",
+                    backgroundColor: index === activeReviewIndex ? "#5ea34d" : "#ddd",
+                    border: "none",
+                    cursor: "pointer",
+                    transition: "all 0.3s ease",
+                    padding: 0,
+                  }}
+                />
+              ))}
+            </div>
+          </div>
+
+          <button
+            type="button"
+            onClick={handleNextReview}
+            aria-label="Next review"
+            style={{
+              background: "transparent",
+              border: "none",
+              padding: 0,
+              cursor: "pointer",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+            }}
+          >
+            <img
+              src="/Icons/right-arrow.png"
+              alt=""
+              style={{ width: 20, height: 20 }}
+            />
+          </button>
         </div>
       </section>
 

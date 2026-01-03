@@ -9,22 +9,14 @@ const loadAvatarFromDisk = (fileName) => {
   try {
     const filePath = path.join(photosDir, fileName);
     const data = fs.readFileSync(filePath);
-    return { data, contentType: "image/jpeg" };
+    const extension = path.extname(fileName).toLowerCase();
+    const mime = extension === ".png" ? "image/png" : "image/jpeg";
+    return `data:${mime};base64,${data.toString("base64")}`;
   } catch (error) {
     // eslint-disable-next-line no-console
     console.error(`Failed to load admin avatar "${fileName}": ${error.message}`);
-    return null;
+    return "";
   }
-};
-
-const cloneAvatarPayload = (avatar) => {
-  if (!avatar || !avatar.data) {
-    return undefined;
-  }
-  return {
-    data: Buffer.from(avatar.data),
-    contentType: avatar.contentType || "image/jpeg",
-  };
 };
 
 const adminSeedData = [
@@ -64,7 +56,7 @@ const seedAdmins = async () => {
       email: admin.email,
       role: "admin",
       password: await bcrypt.hash(admin.password, 10),
-      ...(admin.avatar && { avatar: cloneAvatarPayload(admin.avatar) }),
+      ...(admin.avatar && { avatar: admin.avatar }),
     }))
   );
 

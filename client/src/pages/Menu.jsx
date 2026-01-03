@@ -126,6 +126,7 @@ const Menu = () => {
 
     return ordered;
   }, [menuItems, menuCategories]);
+  const isMobile = windowWidth <= 768;
 
   const activeMenu = menuData[activeTab];
   const firstColumn = activeMenu?.categories?.[0] || null;
@@ -229,11 +230,15 @@ const Menu = () => {
         {/* Category Buttons */}
         <div
           style={{
-            display: "flex",
-            flexWrap: "wrap",
+            display: "grid",
+            gridTemplateColumns: isMobile ? "repeat(2, minmax(0, 1fr))" : "repeat(4, minmax(0, auto))",
+            gap: isMobile ? "12px" : "15px",
             justifyContent: "center",
-            gap: "15px",
+            alignItems: "stretch",
             marginBottom: "60px",
+            maxWidth: isMobile ? "520px" : "auto",
+            marginLeft: "auto",
+            marginRight: "auto",
           }}
         >
           {menuCategories.map((category) => (
@@ -251,8 +256,8 @@ const Menu = () => {
                     : "#000",
                 color: "#fff",
                 border: "none",
-                padding: windowWidth <= 768 ? "12px 30px" : "15px 40px",
-                fontSize: windowWidth <= 768 ? "0.9em" : "1em",
+                padding: isMobile ? "12px 18px" : "15px 40px",
+                fontSize: isMobile ? "0.9em" : "1em",
                 fontFamily: "'Lato', sans-serif",
                 fontWeight: "600",
                 letterSpacing: "2px",
@@ -260,7 +265,8 @@ const Menu = () => {
                 cursor: "pointer",
                 transition: "all 0.3s ease",
                 borderRadius: "0px",
-                marginTop: "-40px"
+                width: "100%",
+                marginTop: isMobile ? "0" : "-40px",
               }}
             >
               {category.title}

@@ -1,5 +1,5 @@
-import React, { Suspense, lazy } from "react";
-import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
+import React, { Suspense, lazy, useEffect } from "react";
+import { BrowserRouter as Router, Routes, Route, useLocation } from "react-router-dom";
 import Layout from "./components/Layout";
 import AdminLayout from "./components/AdminLayout";
 
@@ -31,10 +31,19 @@ const PageLoader = () => (
   </div>
 );
 
+function ScrollToTop() {
+  const location = useLocation();
+  useEffect(() => {
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  }, [location.pathname]);
+  return null;
+}
+
 export default function App() {
   return (
     <Router>
       <Suspense fallback={<PageLoader />}>
+        <ScrollToTop />
         <Routes>
           {/* Admin Sign In route without Layout (no header/footer) */}
           <Route path="/admin" element={<AdminSignIn />} />
