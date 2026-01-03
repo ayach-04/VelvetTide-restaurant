@@ -11,7 +11,7 @@ import {
 } from "./adminTheme";
 import { normalizeAvatarForClient } from "../../utils/avatarUtils";
 
-const API_BASE_URL = import.meta.env.VITE_API_URL || "http://localhost:5000";
+const API_BASE_URL = 'https://velvettide-restaurant.onrender.com";
 const FALLBACK_AVATAR = "/Photos/img6.jpg";
 const ADMIN_PROFILE_EVENT = "adminProfile:updated";
 
