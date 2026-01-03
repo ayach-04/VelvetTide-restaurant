@@ -2,7 +2,7 @@ import React, { useEffect, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { normalizeAvatarForClient } from "../utils/avatarUtils";
 
-const API_BASE_URL = 'https://velvettide-restaurant.onrender.com";
+const API_BASE_URL = "https://velvettide-restaurant.onrender.com";
 const ADMIN_PROFILE_EVENT = "adminProfile:updated";
 const LAST_EMAIL_KEY = "adminLastEmail";
 
