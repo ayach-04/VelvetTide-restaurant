@@ -3,7 +3,7 @@ import { useSearchParams } from "react-router-dom";
 
 const Menu = () => {
   const [searchParams] = useSearchParams();
-  const API_BASE_URL = 'https://velvettide-restaurant.onrender.com";
+  const API_BASE_URL = "https://velvettide-restaurant.onrender.com";
   const [windowWidth, setWindowWidth] = useState(window.innerWidth);
   const [hoveredItem, setHoveredItem] = useState(null);
   const [activeTab, setActiveTab] = useState("BREAKFAST");
