@@ -1110,14 +1110,13 @@ export default function Home() {
           ❝
         </div>
 
+
         <div
           style={{
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
-            gap: windowWidth <= 768 ? "12px" : "24px",
-            marginTop: windowWidth <= 768 ? "10px" : "20px",
-            flexWrap: windowWidth <= 640 ? "wrap" : "nowrap",
+            position: "relative",
+            maxWidth: "1000px",
+            margin: "0 auto",
+            padding: windowWidth <= 768 ? "0 50px" : "0 100px",
           }}
         >
           <button
@@ -1125,6 +1124,10 @@ export default function Home() {
             onClick={handlePreviousReview}
             aria-label="Previous review"
             style={{
+              position: "absolute",
+              left: windowWidth <= 768 ? "10px" : "0",
+              top: "50%",
+              transform: "translateY(-50%)",
               background: "transparent",
               border: "none",
               padding: 0,
@@ -1141,7 +1144,7 @@ export default function Home() {
             />
           </button>
 
-          <div style={{ maxWidth: "700px", textAlign: "center" }}>
+          <div style={{ maxWidth: "700px", margin: "0 auto", textAlign: "center" }}>
             {/* Review Text */}
             <p
               style={{
@@ -1200,6 +1203,10 @@ export default function Home() {
             onClick={handleNextReview}
             aria-label="Next review"
             style={{
+              position: "absolute",
+              right: windowWidth <= 768 ? "10px" : "0",
+              top: "50%",
+              transform: "translateY(-50%)",
               background: "transparent",
               border: "none",
               padding: 0,
