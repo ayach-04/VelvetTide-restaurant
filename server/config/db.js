@@ -1,7 +1,7 @@
 const mongoose = require("mongoose");
 
 const MONGO_URI =
-  process.env.MONGO_URI || "mongodb+srv://userauth:5362@cluster0.pkll8.mongodb.net/restaurant";
+  process.env.MONGO_URI || "mongodb+srv://Nadir:12344321@cluster0.pkll8.mongodb.net/restaurant";
 
 const connectDB = async () => {
   try {
