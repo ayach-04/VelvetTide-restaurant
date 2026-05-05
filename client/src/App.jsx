@@ -1,12 +1,12 @@
 import React, { Suspense, lazy, useEffect } from "react";
-import { BrowserRouter as Router, Routes, Route, useLocation } from "react-router-dom";
+import { BrowserRouter as Router, Routes, Route, useLocation, Navigate } from "react-router-dom";
 import Layout from "./components/Layout";
 import AdminLayout from "./components/AdminLayout";
 
-const Home = lazy(() => import("./pages/Home"));
-const About = lazy(() => import("./pages/About"));
-const Contact = lazy(() => import("./pages/Contact"));
-const Menu = lazy(() => import("./pages/Menu"));
+import Home from "./pages/Home";
+import About from "./pages/About";
+import Contact from "./pages/Contact";
+import Menu from "./pages/Menu";
 
 const AdminSignIn = lazy(() => import("./pages/AdminSignIn"));
 const Dashboard = lazy(() => import("./pages/admin/Dashboard"));
@@ -39,6 +39,18 @@ function ScrollToTop() {
   return null;
 }
 
+function PrivateAdminRoute({ children }) {
+  const location = useLocation();
+  const token = localStorage.getItem("adminToken");
+
+  if (!token) {
+    console.warn("Status: Unauthorized. Redirecting to admin login.");
+    return <Navigate to="/admin" replace state={{ from: location }} />;
+  }
+
+  return children;
+}
+
 export default function App() {
   return (
     <Router>
@@ -49,7 +61,14 @@ export default function App() {
           <Route path="/admin" element={<AdminSignIn />} />
 
           {/* Admin routes with persistent layout */}
-          <Route path="/admin/*" element={<AdminLayout />}>
+          <Route
+            path="/admin/*"
+            element={(
+              <PrivateAdminRoute>
+                <AdminLayout />
+              </PrivateAdminRoute>
+            )}
+          >
             <Route path="dashboard" element={<Dashboard />} />
             <Route path="reservations" element={<ReservationsManagement />} />
             <Route path="management" element={<Management />} />
