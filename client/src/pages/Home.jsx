@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import ReservationPopup from "../components/ReservationPopup";
 
 const REVIEW_DATA = [
@@ -40,6 +40,8 @@ export default function Home() {
   const [windowWidth, setWindowWidth] = useState(window.innerWidth);
   const [isReservationOpen, setIsReservationOpen] = useState(false);
   const [activeReviewIndex, setActiveReviewIndex] = useState(0);
+
+  const navigate = useNavigate();
 
   // Track window width for responsive design
   useEffect(() => {
@@ -404,7 +406,7 @@ export default function Home() {
       >
         {/* Background Image */}
         <img
-          src="/Photos/Banner1.png"
+          src="../../public/photos/Banner 1.png"
           alt="Restaurant Banner"
           style={{
             position: "absolute",
@@ -465,7 +467,7 @@ export default function Home() {
             width: windowWidth <= 768 ? "100%" : "auto",
           }}>
             <button
-              onClick={() => document.getElementById('menu').scrollIntoView({ behavior: 'smooth' })}
+              onClick={() => navigate('/menu')}
               style={{
                 backgroundColor: "#ff6b35",
                 color: "white",
@@ -573,6 +575,7 @@ export default function Home() {
           </p>
 
           <button
+            onClick={() => navigate('/about')}
             style={{
               backgroundColor: "#ff6b35",
               color: "white",
@@ -1027,6 +1030,7 @@ export default function Home() {
             crafted with passion and served with excellence"
           </p>
           <button
+            onClick={() => navigate('/menu')}
             style={{
               padding: "12px 30px",
               fontSize: "0.8em",
@@ -1110,13 +1114,14 @@ export default function Home() {
           ❝
         </div>
 
-
         <div
           style={{
-            position: "relative",
-            maxWidth: "1000px",
-            margin: "0 auto",
-            padding: windowWidth <= 768 ? "0 50px" : "0 100px",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            gap: windowWidth <= 768 ? "12px" : "24px",
+            marginTop: windowWidth <= 768 ? "10px" : "20px",
+            flexWrap: windowWidth <= 640 ? "wrap" : "nowrap",
           }}
         >
           <button
@@ -1124,10 +1129,6 @@ export default function Home() {
             onClick={handlePreviousReview}
             aria-label="Previous review"
             style={{
-              position: "absolute",
-              left: windowWidth <= 768 ? "10px" : "0",
-              top: "50%",
-              transform: "translateY(-50%)",
               background: "transparent",
               border: "none",
               padding: 0,
@@ -1144,7 +1145,7 @@ export default function Home() {
             />
           </button>
 
-          <div style={{ maxWidth: "700px", margin: "0 auto", textAlign: "center" }}>
+          <div style={{ maxWidth: "700px", textAlign: "center" }}>
             {/* Review Text */}
             <p
               style={{
@@ -1203,10 +1204,6 @@ export default function Home() {
             onClick={handleNextReview}
             aria-label="Next review"
             style={{
-              position: "absolute",
-              right: windowWidth <= 768 ? "10px" : "0",
-              top: "50%",
-              transform: "translateY(-50%)",
               background: "transparent",
               border: "none",
               padding: 0,
