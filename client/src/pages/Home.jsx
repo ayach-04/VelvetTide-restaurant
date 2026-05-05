@@ -406,7 +406,7 @@ export default function Home() {
       >
         {/* Background Image */}
         <img
-          src="/photos/Banner_1.png"
+          src="/photos/Banner1.png"
           alt="Restaurant Banner"
           style={{
             position: "absolute",
